@@ -39,6 +39,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.cricket.broadcaster.DOAD_TRIO;
+import com.cricket.containers.Excel;
 import com.cricket.containers.Scene;
 import com.cricket.service.CricketService;
 import com.cricket.model.*;
@@ -58,6 +59,7 @@ public class IndexController
 	public static String current_date = "";
 	public static String error_message = "";
 	public static DOAD_TRIO this_DOAD_TRIO;
+	public static Excel this_Excel=new Excel();
 	public static MatchAllData session_match = new MatchAllData();
 	public static EventFile session_event = new EventFile();
 	public static Configuration session_Configurations = new Configuration();
@@ -182,30 +184,100 @@ public class IndexController
 		}
 	}
 	
-	public static String getDataFromExcelFile() throws JAXBException, IOException {
-		
-		File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
-	    try {
-	        FileInputStream inputStream = new FileInputStream(file);
-	        Workbook doadWorkBook = new XSSFWorkbook(inputStream);
-	        for (Sheet sheet : doadWorkBook) {
-	        	int firstRow = sheet.getFirstRowNum();
-	        	int lastRow = sheet.getLastRowNum();
-	        	for (int index = firstRow; index <= lastRow; index++) {
-	        	    Row row = sheet.getRow(index);
-	        	    for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++) {
-	        	    	Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-        	    		printCellValue(cell);
-	        	    }
-	        	}
+//	public static String getDataFromExcelFile() throws JAXBException, IOException {
+//		
+//		File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
+//	    try {
+//	        FileInputStream inputStream = new FileInputStream(file);
+//	        Workbook doadWorkBook = new XSSFWorkbook(inputStream);
+//	        for (Sheet sheet : doadWorkBook) {
+//	        	int firstRow = sheet.getFirstRowNum();
+//	        	int lastRow = sheet.getLastRowNum();
+//	        	for (int index = firstRow; index <= lastRow; index++) {
+//	        	    Row row = sheet.getRow(index);
+//	        	    for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++) {
+//	        	    	Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+//        	    		printCellValue(cell);
+//	        	    }
+//	        	}
+//	        }
+//	        inputStream.close();
+//	    } catch (IOException e) {
+//	        e.printStackTrace();
+//	    }
+//		
+//		return null;
+//	}
+	public static void getDataFromExcelFile() {
+	    File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
+	    try (FileInputStream inputStream = new FileInputStream(file);
+	         Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+	        Sheet sheet = workbook.getSheetAt(0);
+	        int tableStartIndex = 0;
+	        int totalRows = sheet.getPhysicalNumberOfRows();
+	        int totalCols = sheet.getRow(tableStartIndex).getPhysicalNumberOfCells();
+
+	        // Check if more than 0 cells contain data
+	        boolean dataExists = false;
+	        for (int i = tableStartIndex; i < totalRows; i++) {
+	            Row row = sheet.getRow(i);
+	            if (row != null) {
+	                for (int j = 0; j < totalCols; j++) {
+	                    Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	                    if (cell != null && !cell.toString().isEmpty()) {
+	                        dataExists = true;
+	                        break;
+	                    }
+	                }
+	            }
+	            if (dataExists) {
+	                break;
+	            }
 	        }
-	        inputStream.close();
+
+	        // If more than 0 cells contain data or cell 1 contains data, print the table
+	        if (dataExists || (totalCols > 1 && !sheet.getRow(tableStartIndex).getCell(1).toString().isEmpty())) {
+	            // Create a 2D array to store table data
+	            String[][] tableData = new String[totalRows - tableStartIndex][totalCols];
+
+	            // Process the table
+	            processTable(sheet, tableData, tableStartIndex, totalRows, totalCols);
+
+	            // Print the processed table
+	            printTable(tableData);
+	        } else {
+	            // If only cell 0 contains data, print it as text
+	            Cell cell = sheet.getRow(tableStartIndex).getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	            System.out.println(cell.toString());
+	        }
+
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
-		
-		return null;
 	}
+
+	private static void processTable(Sheet sheet, String[][] tableData, int tableStartIndex, int totalRows, int totalCols) {
+	    for (int i = tableStartIndex; i < totalRows; i++) {
+	        Row row = sheet.getRow(i);
+	        if (row != null) {
+	            for (int j = 0; j < totalCols; j++) {
+	                Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	                tableData[i - tableStartIndex][j] = (cell != null) ? cell.toString() : "";
+	            }
+	        }
+	    }
+	}
+
+	private static void printTable(String[][] tableData) {
+	    for (String[] row : tableData) {
+	        for (String cell : row) {
+	            System.out.print(cell + "\t");
+	        }
+	        System.out.println();
+	    }
+	}
+
 	public static void printCellValue(Cell cell) {
 	    CellType cellType = cell.getCellType().equals(CellType.FORMULA)
 	      ? cell.getCachedFormulaResultType() : cell.getCellType();
