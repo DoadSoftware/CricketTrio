@@ -61,6 +61,15 @@ public class Excel {
 	public void setTrioPage(String trioPage) {
 		this.trioPage = trioPage;
 	}
+	public Excel(String grafix, String size,String trioPage, String header, String subHeader,  String[][] table) {
+		super();
+		this.grafix = grafix;
+		this.size = size;
+		this.trioPage = trioPage;
+		this.header = header;
+		this.subHeader = subHeader;
+		this.table = table;
+	}
 
 	@Override
 	public String toString() {
