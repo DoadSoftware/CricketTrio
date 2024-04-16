@@ -12,12 +12,17 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
   </properties>
 <dependencies>
-
+<dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>5.1.0</version>
+    </dependency>
+    
 <dependency>
     <groupId>com.cricket</groupId>
     <artifactId>CricketLibrary</artifactId>
     <scope>compile</scope>
-    <version>1.325</version>
+    <version>1.326</version>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->

@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.io.PrintWriter;
@@ -51,6 +53,7 @@ import com.cricket.util.CricketFunctions;
 import com.cricket.util.CricketUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 @Controller
@@ -158,7 +161,8 @@ public class IndexController
 			JAXBContext.newInstance(Configuration.class).createMarshaller().marshal(session_Configurations, 
 					new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
 			
-			getDataExcelFile();
+			getDataFromExcelFile();
+
 			
 			model.addAttribute("session_match", session_match);
 			model.addAttribute("session_selected_broadcaster", session_selected_broadcaster);
@@ -177,7 +181,10 @@ public class IndexController
 	{
 		//System.out.println("session_selected_broadcaster = " + session_selected_broadcaster);
 		switch (whatToProcess.toUpperCase()) {
-		
+			case "GRAPHIC_OPTIONS":
+				Map<String,String> map =getDataFromExcelFile();
+			 return JSONArray.fromObject(map.keySet()).toString();
+			
 		default:
 			switch (session_selected_broadcaster) {
 			case CricketUtil.DOAD_TRIO:
@@ -188,92 +195,60 @@ public class IndexController
 		}
 	}
 	
-	public static void getDataExcelFile() throws IOException, InvalidFormatException {
-        File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
-        Workbook workbook = new XSSFWorkbook(file);
-        Sheet sheet = workbook.getSheetAt(0);
-        int tableStartIndex = 0;
-        int totalRows = sheet.getPhysicalNumberOfRows();
-        int totalCols = sheet.getRow(tableStartIndex).getPhysicalNumberOfCells();
-        int emptyRowCount = 0;
-        boolean dataExists = false;
-        String[][] tableData = null;
-        String key = "";
-        Map<String, List<String[][]>> data = new HashMap<>();
+	 public static Map <String, String>  getDataFromExcelFile() {
+	        File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
+	        
+	        Map<String, String> dataMap = new LinkedHashMap<>();
+	        
+	        
+	        try (FileInputStream inputStream = new FileInputStream(file);
+	             Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-        for (int i = tableStartIndex; i < totalRows; i++) {
-            Row row = sheet.getRow(i);
-            if (row != null) {
-                boolean rowHasData = false;
-                for (int j = 0; j < totalCols; j++) {
-                    Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                    if (cell != null && !cell.toString().isEmpty()) {
-                        rowHasData = true;
-                        if (!dataExists) {
-                            if (emptyRowCount >= 2) {
-                                key = cell.toString();
-                                dataExists = true;
-                                emptyRowCount = 0;
-                            }
-                        } else {
-                            if (tableData == null) {
-                                tableData = new String[totalRows - tableStartIndex][totalCols];
-                            }
-                            // Process the table
-                            processTable(sheet, tableData, tableStartIndex, totalRows, totalCols);
-                        }
-                    }
-                }
-                if (!rowHasData) {
-                    emptyRowCount++;
-                }
-            } else {
-                emptyRowCount++;
-            }
+	            Sheet sheet = workbook.getSheetAt(0);
+	            int totalRows = sheet.getPhysicalNumberOfRows();
+	            StringBuilder tableData = new StringBuilder();
+	            String key = null;
 
-            if (dataExists && emptyRowCount >= 2) {
-                // Add the table data to the map
-                List<String[][]> tables = data.getOrDefault(key, new ArrayList<>());
-                tables.add(tableData);
-                data.put(key, tables);
-                // Reset variables for the next table
-                tableData = null;
-                dataExists = false;
-                emptyRowCount = 0;
-            }
-        }
+	            for (int rowIndex = 0; rowIndex < totalRows; rowIndex++) {
+	                Row row = sheet.getRow(rowIndex);
+	                if (row != null && !isRowEmpty(row)) {
+	                    Cell firstCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	                    String cellValue = firstCell.toString();
+	                    if (cellValue.matches("^\\d+\\.\\s.*")) {
+	                        if (key != null && tableData.length() > 0) {
+	                            dataMap.put(key, tableData.toString());
+	                            tableData.setLength(0);
+	                        }
+	                        key = cellValue;
+	                    }
+	                    for (int j = 0; j < row.getLastCellNum(); j++) {
+	                        Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	                        tableData.append(cell.toString()).append("\t");
+	                    }
+	                    tableData.append("\n");
+	                }
+	            }
 
-        // Print the HashMap
-        for (Map.Entry<String, List<String[][]>> entry : data.entrySet()) {
-            System.out.println("Key: " + entry.getKey());
-            List<String[][]> tables = entry.getValue();
-            for (int i = 0; i < tables.size(); i++) {
-                System.out.println("Table " + (i + 1) + ":");
-                printTable(tables.get(i));
-            }
-        }
-    }
+	            if (key != null && tableData.length() > 0) {
+	                dataMap.put(key, tableData.toString());
+	            }
 
-    private static void processTable(Sheet sheet, String[][] tableData, int tableStartIndex, int totalRows, int totalCols) {
-        for (int i = tableStartIndex; i < totalRows; i++) {
-            Row row = sheet.getRow(i);
-            if (row != null) {
-                for (int j = 0; j < totalCols; j++) {
-                    Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                    tableData[i - tableStartIndex][j] = (cell != null) ? cell.toString() : "";
-                }
-            }
-        }
-    }
+	           // printDataMap(dataMap);
 
-    private static void printTable(String[][] tableData) {
-        for (String[] row : tableData) {
-            for (String cell : row) {
-                System.out.print(cell + "\t");
-            }
-            System.out.println();
-        }
-    }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+			return dataMap;
+	    }
+	    private static boolean isRowEmpty(Row row) {
+	        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
+	            Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	            if (cell != null && cell.getCellType() != CellType.BLANK) {
+	                return false;
+	            }
+	        }
+	        return true;
+	    }
 	public static void printCellValue(Cell cell) {
 	    CellType cellType = cell.getCellType().equals(CellType.FORMULA)
 	      ? cell.getCachedFormulaResultType() : cell.getCellType();

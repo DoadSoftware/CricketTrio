@@ -33,6 +33,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			processCricketProcedures('POINTS_TABLES');
 			addItemsToList('POINTS_TABLES-OPTION',null)
 			break;
+		case 112://F1 - graphics_options
+		$("#captions_div").hide();
+		$("#cancel_match_setup_btn").hide();
+		$("#expiry_message").hide();
+		processCricketProcedures('GRAPHIC_OPTIONS');
+		break;
 		}
 		
 		break;
@@ -68,7 +74,9 @@ function processUserSelection(whichInput)
 	case 'save_pointstable':
 		processCricketProcedures('SAVE_POINTSTABLE');
 		break;	
-	
+	case 'populate_graphics':
+		processCricketProcedures('POPULATE_GRAPHICS');
+		break;	
 	case 'load_scene_btn':
 		/*if(checkEmpty($('#vizIPAddress'),'IP Address Blank') == false
 			|| checkEmpty($('#vizPortNumber'),'Port Number Blank') == false) {
@@ -82,8 +90,13 @@ function processCricketProcedures(whatToProcess)
 {
 	var valueToProcess;
 	switch(whatToProcess) {
+	
 	case 'SAVE_POINTSTABLE':
 		valueToProcess = $('#savePointsTable').val();
+		break;	
+	case 'POPULATE_GRAPHICS':
+	alert( $('#selectGraphics').val());
+		valueToProcess = $('#selectGraphics').val();
 		break;	
 	}
 
@@ -99,6 +112,10 @@ function processCricketProcedures(whatToProcess)
 				document.getElementById('select_graphic_options_div').style.display = 'none';
 				$("#main_captions_div").show();
 				break;
+			
+			case 'GRAPHIC_OPTIONS':
+				addItemsToList('GRAPHICS',data);
+				break;
         	}
 			processWaitingButtonSpinner('END_WAIT_TIMER');
 	    },    
@@ -112,9 +129,9 @@ function addItemsToList(whatToProcess, dataToProcess)
 	var select,option,header_text,div,table,tbody,row;
 	
 	switch(whatToProcess){
-		case 'POINTS_TABLES-OPTION':
+		case 'POINTS_TABLES-OPTION':case 'GRAPHICS':
 			switch ($('#select_broadcaster').val().toUpperCase()){
-				case 'PHL_2023':
+				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
 	
 					header_text = document.createElement('h6');
@@ -166,6 +183,47 @@ function addItemsToList(whatToProcess, dataToProcess)
 						    
 							document.getElementById('select_graphic_options_div').style.display = '';
 							break;
+						
+					case 'GRAPHICS':
+					    cellCount = 0; 
+					    select = document.createElement('select');
+					    select.style.width = '130px';
+					    select.id = 'selectGraphics';
+					    select.name = select.id;
+
+					    for (let i = 0; i < dataToProcess.length; i++) {
+					         option = document.createElement('option');
+					         option.value = dataToProcess[i];
+					         option.text = dataToProcess[i];
+					         select.appendChild(option);
+					    }
+					    row.insertCell(cellCount).appendChild(select);
+					    cellCount++;
+					
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics';
+							option.value = 'populate graphics';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(1).appendChild(div);
+						    
+							document.getElementById('select_graphic_options_div').style.display = '';
+							break;
+
 					}
 					break;
 			}
