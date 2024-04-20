@@ -29,9 +29,9 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 		case 32:
 			processCricketProcedures('CLEAR-ALL');
 			break;
-		case 80:
-			processCricketProcedures('POINTS_TABLES');
-			addItemsToList('POINTS_TABLES-OPTION',null)
+		case 80://P
+			processCricketProcedures('LOAD_GRAPHICS');
+			addItemsToList('LOAD_GRAPHICS-OPTION',null)
 			break;
 		case 112://F1 - graphics_options
 		$("#captions_div").hide();
@@ -71,8 +71,8 @@ function processUserSelection(whichInput)
 		$("#main_captions_div").show();
 		
 		break;
-	case 'save_pointstable':
-		processCricketProcedures('SAVE_POINTSTABLE');
+	case 'save_graphics':
+		processCricketProcedures('SAVE_GRAPHICS');
 		break;	
 	case 'populate_graphics':
 		processCricketProcedures('POPULATE_GRAPHICS');
@@ -91,11 +91,10 @@ function processCricketProcedures(whatToProcess)
 	var valueToProcess;
 	switch(whatToProcess) {
 	
-	case 'SAVE_POINTSTABLE':
+	case 'SAVE_GRAPHICS':
 		valueToProcess = $('#savePointsTable').val();
 		break;	
 	case 'POPULATE_GRAPHICS':
-	alert( $('#selectGraphics').val());
 		valueToProcess = $('#selectGraphics').val();
 		break;	
 	}
@@ -107,7 +106,7 @@ function processCricketProcedures(whatToProcess)
         dataType : 'json',
         success : function(data) {
         	switch(whatToProcess) {
-			case 'SAVE_POINTSTABLE':
+			case 'SAVE_GRAPHICS':
 				$('#select_graphic_options_div').empty();
 				document.getElementById('select_graphic_options_div').style.display = 'none';
 				$("#main_captions_div").show();
@@ -129,7 +128,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 	var select,option,header_text,div,table,tbody,row;
 	
 	switch(whatToProcess){
-		case 'POINTS_TABLES-OPTION':case 'GRAPHICS':
+		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS':
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -148,7 +147,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 					
 					row = tbody.insertRow(tbody.rows.length);
 					switch(whatToProcess){
-						case 'POINTS_TABLES-OPTION':
+						case 'LOAD_GRAPHICS-OPTION':
 							select = document.createElement('input');
 							select.type = "text";
 							select.id = 'savePointsTable';
@@ -162,8 +161,8 @@ function addItemsToList(whatToProcess, dataToProcess)
 							
 							option = document.createElement('input');
 						    option.type = 'button';
-							option.name = 'save_pointstable';
-							option.value = 'Save Points Table';
+							option.name = 'save_graphics';
+							option.value = 'Save graphics';
 						    option.id = option.name;
 						    option.setAttribute('onclick',"processUserSelection(this)");
 						    

@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.io.PrintWriter;
@@ -162,7 +163,6 @@ public class IndexController
 					new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
 			
 			getDataFromExcelFile();
-
 			
 			model.addAttribute("session_match", session_match);
 			model.addAttribute("session_selected_broadcaster", session_selected_broadcaster);
@@ -212,8 +212,7 @@ public class IndexController
 	            for (int rowIndex = 0; rowIndex < totalRows; rowIndex++) {
 	                Row row = sheet.getRow(rowIndex);
 	                if (row != null && !isRowEmpty(row)) {
-	                    Cell firstCell = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-	                    String cellValue = firstCell.toString();
+	                    String cellValue = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 	                    if (cellValue.matches("^\\d+\\.\\s.*")) {
 	                        if (key != null && tableData.length() > 0) {
 	                            dataMap.put(key, tableData.toString());
@@ -222,8 +221,7 @@ public class IndexController
 	                        key = cellValue;
 	                    }
 	                    for (int j = 0; j < row.getLastCellNum(); j++) {
-	                        Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-	                        tableData.append(cell.toString()).append("\t");
+	                        tableData.append(row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString()).append("\t");
 	                    }
 	                    tableData.append("\n");
 	                }
@@ -233,13 +231,12 @@ public class IndexController
 	                dataMap.put(key, tableData.toString());
 	            }
 
-	           // printDataMap(dataMap);
-
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
 			return dataMap;
 	    }
+	
 	    private static boolean isRowEmpty(Row row) {
 	        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
 	            Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
@@ -249,21 +246,4 @@ public class IndexController
 	        }
 	        return true;
 	    }
-	public static void printCellValue(Cell cell) {
-	    CellType cellType = cell.getCellType().equals(CellType.FORMULA)
-	      ? cell.getCachedFormulaResultType() : cell.getCellType();
-	    if (cellType.equals(CellType.STRING)) {
-	        System.out.print(cell.getStringCellValue() + " | ");
-	    }
-	    if (cellType.equals(CellType.NUMERIC)) {
-	        if (DateUtil.isCellDateFormatted(cell)) {
-	            System.out.print(cell.getDateCellValue() + " | ");
-	        } else {
-	            System.out.print(cell.getNumericCellValue() + " | ");
-	        }
-	    }
-	    if (cellType.equals(CellType.BOOLEAN)) {
-	        System.out.print(cell.getBooleanCellValue() + " | ");
-	    }
-	}
 }
