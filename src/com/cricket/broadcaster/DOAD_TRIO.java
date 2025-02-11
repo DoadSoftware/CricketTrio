@@ -14,6 +14,7 @@ import com.cricket.model.BattingCard;
 import com.cricket.model.Inning;
 import com.cricket.model.MatchAllData;
 import com.cricket.model.Player;
+import com.cricket.model.Team;
 import com.cricket.service.CricketService;
 import com.cricket.util.CricketFunctions;
 import com.cricket.util.CricketUtil;
@@ -32,6 +33,7 @@ public class DOAD_TRIO extends Scene{
 	public Object ProcessGraphicOption(String whatToProcess, CricketService cricketService, MatchAllData match, PrintWriter print_writer, List<Scene> scenes, 
 			String valueToProcess) throws IOException, JAXBException {
 		System.out.println(whatToProcess.toUpperCase());
+		System.out.println(valueToProcess);
 		switch(whatToProcess.toUpperCase()) {
 		//Load Scene
 		case "LOAD_GRAPHICS":
@@ -71,7 +73,11 @@ public class DOAD_TRIO extends Scene{
 			populateNextToBat(print_writer,match, cricketService);
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;
-			
+		case "POPULATE_GRAPHICS_LINEUP":	
+			DoadWriteToTrio(print_writer, "read_template LineUp_2Teams_WithChangeOns");
+			populateLineUp(print_writer,match, cricketService,Integer.valueOf(valueToProcess.split(",")[0]));
+			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[1]);
+			break;
 		case "POPULATE_GRAPHICS":
 			Map<String, String> mp = IndexController.getDataFromExcelFile();
 			String [] str =mp.get(valueToProcess).split("\n");
@@ -88,6 +94,7 @@ public class DOAD_TRIO extends Scene{
 		return null;
 	}
 	 
+	
 	public void PopulateGraphics(PrintWriter print_writer,String[] str) {
 		//DoadWriteToTrio(print_writer, "page:read_internal /storage/shows/{0CAF4F6A-629C-4D6E-A3F8-DF6F7ED0A5DB}/elements/101");
 		for (int i = 6; i < str.length; i++) {
@@ -199,19 +206,159 @@ public class DOAD_TRIO extends Scene{
 			case CricketUtil.STILL_TO_BAT:
 				if(bc.getHowOut() != null && !bc.getHowOut().equalsIgnoreCase(CricketUtil.RETIRED_HURT)) continue;
 				rowId++;
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 01-PLAYER-IMAGE " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
-				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002-LIST 001-SCORE-POSITION-OMO " +(rowId-1) +" 0");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 01-PLAYER-IMAGE " +(rowId-1)+ " C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+
+				(inning.getBattingTeamId()== match.getSetup().getHomeTeamId() ?match.getSetup().getHomeTeam().getTeamName4() : 
+					match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+bc.getPlayer().getPhoto()+CricketUtil.PNG_EXTENSION + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 02-ICON " +(rowId-1)+ " IMAGE*/Default/Essentials/Icons/"+getPlayerIconName(bc.getPlayer())+ "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 03-FIRST-NAME " +(rowId-1)+" "+ bc.getPlayer().getFirstname() + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 04-LAST-NAME " + (rowId-1)+" "+(bc.getPlayer().getSurname() == null ? "" : bc.getPlayer().getSurname()) + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 05-IN-AT " +(rowId-1)+" IN AT " + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 06-HIDE-NUMBER " +(rowId-1)+" "+ "1" );
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 07-POSITION " +(rowId-1)+" "+ position);
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 08-RUNS "	 + (rowId-1)+"  ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 002-LIST 09-BALLS " +(rowId-1)+"  ");
+
 				break;
 			}
 			
 		}
 	}
+	
+	private void populateLineUp(PrintWriter print_writer, MatchAllData match, CricketService cricketService,Integer TeamId) {
+	
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-REF-NAME " + (match.getSetup().getHomeTeamId() == TeamId ? 
+				match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4()));
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-REF-NAME " + (match.getSetup().getHomeTeamId() == TeamId ? 
+				match.getSetup().getAwayTeam().getTeamName4() : match.getSetup().getHomeTeam().getTeamName4()));
+		
+		int rowId = 0;
+		//team1
+		if(TeamId==match.getSetup().getHomeTeamId()) {
+			for(Player ply : match.getSetup().getHomeSquad()) {
+				rowId++;
+				DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 001-SCORE-POSITION-OMO " +(rowId-1) +" 0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 01-PLAYER-IMAGE " +(rowId-1)+ " C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+
+				(TeamId== match.getSetup().getHomeTeamId() ?match.getSetup().getHomeTeam().getTeamName4() : 
+					match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+ply.getPhoto()+CricketUtil.PNG_EXTENSION + "");
+				//DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 02-ICON " +(rowId-1)+ " IMAGE*/Default/Essentials/Icons/"+getPlayerIconName(ply)+ "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 03-FIRST-NAME " +(rowId-1)+" "+ ply.getFirstname() + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 04-LAST-NAME " + (rowId-1)+" "+(ply.getSurname() == null ? "" : ply.getSurname()) + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 05-OPENER " +(rowId-1)+" " + getPlayerRole(ply));
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 06-POSITION " +(rowId-1)+" ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 07-RUNS "	 + (rowId-1)+"  ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 08-BALLS " +(rowId-1)+"  ");
+	            DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 08-SELECT-CAPTAIN " + (rowId-1)+ " " + 
+	            		(ply.getCaptainWicketKeeper() != null && ply.getCaptainWicketKeeper().equalsIgnoreCase(CricketUtil.CAPTAIN) ? "1" : "0"));
 
+			}
+		}else {
+			for(Player ply : match.getSetup().getAwaySquad()) {
+				rowId++;
+				DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 001-SCORE-POSITION-OMO " +(rowId-1) +" 0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 01-PLAYER-IMAGE " +(rowId-1)+ " C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+
+				(TeamId== match.getSetup().getHomeTeamId() ?match.getSetup().getHomeTeam().getTeamName4() : 
+					match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+ply.getPhoto()+CricketUtil.PNG_EXTENSION + "");
+				//DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 02-ICON " +(rowId-1)+ " IMAGE*/Default/Essentials/Icons/"+getPlayerIconName(ply)+ "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 03-FIRST-NAME " +(rowId-1)+" "+ ply.getFirstname() + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 04-LAST-NAME " + (rowId-1)+" "+(ply.getSurname() == null ? "" : ply.getSurname()) + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 05-OPENER " +(rowId-1)+" " + getPlayerRole(ply));
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 06-POSITION " +(rowId-1)+" ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 07-RUNS "	 + (rowId-1)+"  ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 004-LIST-1 08-BALLS " +(rowId-1)+"  ");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 004-LIST-1 08-SELECT-CAPTAIN " + (rowId-1)+ " " + 
+		            (ply.getCaptainWicketKeeper() != null && ply.getCaptainWicketKeeper().equalsIgnoreCase(CricketUtil.CAPTAIN) ? "1" : "0"));
+			}
+		}
+		//team2
+		rowId = 0;
+		if(TeamId == match.getSetup().getHomeTeamId()) {
+			for(Player ply : match.getSetup().getAwaySquad()) {
+				rowId++;
+				DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 001-SCORE-POSITION-OMO " +(rowId-1) +" 0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 01-PLAYER-IMAGE " +(rowId-1)+ " C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+
+				(TeamId== match.getSetup().getHomeTeamId() ?match.getSetup().getHomeTeam().getTeamName4() : 
+					match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+ply.getPhoto()+CricketUtil.PNG_EXTENSION + "");
+				//DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 02-ICON " +(rowId-1)+ " IMAGE*/Default/Essentials/Icons/"+getPlayerIconName(ply)+ "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 03-FIRST-NAME " +(rowId-1)+" "+ ply.getFirstname() + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 04-LAST-NAME " + (rowId-1)+" "+(ply.getSurname() == null ? "" : ply.getSurname()) + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 05-OPENER " +(rowId-1)+" " + getPlayerRole(ply));
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 06-POSITION " +(rowId-1)+" ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 07-RUNS "	 + (rowId-1)+"  ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 08-BALLS " +(rowId-1)+"  ");
+	            DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 08-SELECT-CAPTAIN " + (rowId-1) + " " 
+				+ (ply.getCaptainWicketKeeper() != null && ply.getCaptainWicketKeeper().equalsIgnoreCase(CricketUtil.CAPTAIN) ? "1" : "0"));
+
+			}
+		}else {
+			for(Player ply : match.getSetup().getHomeSquad()) {
+				rowId++;
+				DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 001-SCORE-POSITION-OMO " +(rowId-1) +" 0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 01-PLAYER-IMAGE " +(rowId-1)+ " C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+
+				(TeamId== match.getSetup().getHomeTeamId() ?match.getSetup().getHomeTeam().getTeamName4() : 
+					match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+ply.getPhoto()+CricketUtil.PNG_EXTENSION + "");
+				//DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 02-ICON " +(rowId-1)+ " IMAGE*/Default/Essentials/Icons/"+getPlayerIconName(ply)+ "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 03-FIRST-NAME " +(rowId-1)+" "+ ply.getFirstname() + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 04-LAST-NAME " + (rowId-1)+" "+(ply.getSurname() == null ? "" : ply.getSurname()) + "");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 05-OPENER " +(rowId-1)+" " + getPlayerRole(ply));
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 06-POSITION " +(rowId-1)+" ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 07-RUNS "	 + (rowId-1)+"  ");
+				DoadWriteToTrio(print_writer,  "table:set_cell_value 005-LIST-2 08-BALLS " +(rowId-1)+"  ");
+	            DoadWriteToTrio(print_writer, "table:set_cell_value 005-LIST-2 08-SELECT-CAPTAIN " + (rowId-1) + " " 
+				+ (ply.getCaptainWicketKeeper() != null && ply.getCaptainWicketKeeper().equalsIgnoreCase(CricketUtil.CAPTAIN) ? "1" : "0"));
+
+			}
+		}
+	}
+	public static String getPlayerRole(Player as) {
+		switch (as.getRole().toUpperCase()) {
+		case "BATSMAN":case "BATTER":
+			return "BAT";
+		case "BOWLER":
+			return "BOWL";
+		default:
+			return as.getRole().toUpperCase();
+		}
+	}
+	public static String getPlayerIconName(Player as) {
+	    String playerIcon = "";
+	    
+	    if (as.getRole().equalsIgnoreCase("BATSMAN")) {
+	        if (as.getBattingStyle().equalsIgnoreCase("RHB")) {
+	            playerIcon = "Batsman_RightHand";
+	        } else if (as.getBattingStyle().equalsIgnoreCase("LHB")) {
+	            playerIcon = "Batsman_LeftHand";
+	        }
+	    } else if (as.getRole().equalsIgnoreCase("BOWLER")) {
+	        if (as.getBowlingStyle() == null) {
+	            playerIcon = "Pace_Bowler";
+	        } else {
+	            switch (as.getBowlingStyle()) {
+	                case "RF": case "RFM": case "RMF": case "RM": case "RSM":
+	                case "LF": case "LFM": case "LMF": case "LM":
+	                    playerIcon = "Pace_Bowler";
+	                    break;
+	                case "ROB": case "RLB": case "LSL": case "WSL":
+	                case "LCH": case "RLG": case "WSR": case "LSO":
+	                    playerIcon = "Off_Spinner";
+	                    break;
+	            }
+	        }
+	    } else if (as.getRole().equalsIgnoreCase("ALL-ROUNDER")) {
+	    	 if (as.getBattingStyle().equalsIgnoreCase("RHB")) {
+		            playerIcon = "All_RounderRightHand";
+		        } else if (as.getBattingStyle().equalsIgnoreCase("LHB")) {
+		            playerIcon = "All_RounderLeftHand";
+		        }
+	    }
+	     if(as.getCaptainWicketKeeper()!=null && (as.getCaptainWicketKeeper().equalsIgnoreCase("CAPTAIN_WICKET_KEEPER")||
+	    		 as.getCaptainWicketKeeper().equalsIgnoreCase(CricketUtil.WICKET_KEEPER))) {
+			 playerIcon = "WicketKeeper";
+		}
+
+	    return playerIcon;  
+	}
+	
 	public void DoadWriteToTrio(PrintWriter print_writer,String sendCommand) {
 		print_writer.println(sendCommand + return_key + line_feed);
 	}

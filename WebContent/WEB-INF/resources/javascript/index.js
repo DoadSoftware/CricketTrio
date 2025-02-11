@@ -63,6 +63,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_NEXT_BAT_GRAPHIC_OPTIONS');
 			break;
+		case 113://M - LINEUP
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_LINEUP_GRAPHIC_OPTIONS');
+			break;
 		}
 		
 		break;
@@ -113,6 +119,9 @@ function processUserSelection(whichInput)
 	case"populate_graphics_nextToBat":
 		processCricketProcedures('POPULATE_GRAPHICS_NEXT_TO_BAT');
 		break;
+	case "Line_Up":
+		processCricketProcedures('POPULATE_GRAPHICS_LINEUP');
+		break;
 	case 'load_scene_btn':
 		/*if(checkEmpty($('#vizIPAddress'),'IP Address Blank') == false
 			|| checkEmpty($('#vizPortNumber'),'Port Number Blank') == false) {
@@ -141,6 +150,9 @@ function processCricketProcedures(whatToProcess)
 		break;
 	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":
 			valueToProcess = $('#savePointsTable').val();
+	break;
+	case "POPULATE_GRAPHICS_LINEUP":
+		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
 	break;
 	}
 
@@ -172,6 +184,9 @@ function processCricketProcedures(whatToProcess)
 			case'COMPARISION_GRAPHIC_OPTIONS':
 				addItemsToList('ISPL_COMPARISION_OPTIONS',data);
 				break;
+			case "ISPL_LINEUP_GRAPHIC_OPTIONS":
+				addItemsToList('ISPL_LINEUP_OPTIONS',data);
+				break;
         	}
 			processWaitingButtonSpinner('END_WAIT_TIMER');
 	    },    
@@ -186,6 +201,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 	
 	switch(whatToProcess){
 		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
+		case "ISPL_LINEUP_OPTIONS":
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -204,6 +220,58 @@ function addItemsToList(whatToProcess, dataToProcess)
 					
 					row = tbody.insertRow(tbody.rows.length);
 					switch(whatToProcess){
+						case "ISPL_LINEUP_OPTIONS":
+							select = document.createElement('select');
+						    select.style.width = '250px';
+						    select.id = 'whichScene';
+						    select.name = select.id;
+
+						    option = document.createElement('option');
+				         	option.value = dataToProcess.homeTeam.teamId;
+				        	option.text = dataToProcess.homeTeam.teamName1;
+				         	select.appendChild(option);
+				         	
+				         	option = document.createElement('option');
+				         	option.value = dataToProcess.awayTeam.teamId;
+				        	option.text = dataToProcess.awayTeam.teamName1;
+				         	select.appendChild(option);
+				         	
+						    row.insertCell(0).appendChild(select);
+					    
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(1).appendChild(header_text).appendChild(select);
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'Line_Up';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(2).appendChild(div);
+						    
+							document.getElementById('select_graphic_options_div').style.display = '';
+							break;
 						case 'LOAD_GRAPHICS-OPTION':
 							select = document.createElement('input');
 							select.type = "text";

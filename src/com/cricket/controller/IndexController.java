@@ -188,6 +188,8 @@ public class IndexController
 			inning = session_match.getMatch().getInning().stream().filter(inn -> inn.getIsCurrentInning().equalsIgnoreCase(CricketUtil.YES)).findAny().orElse(null);
 			return JSONArray.fromObject(inning.getBowlingTeamId() == session_match.getSetup().getHomeTeamId() ? session_match.getSetup().getHomeSquad() 
 					: session_match.getSetup().getAwaySquad()).toString();
+		case "ISPL_LINEUP_GRAPHIC_OPTIONS":
+			return JSONObject.fromObject(session_match.getSetup()).toString();
 		default:
 			switch (session_selected_broadcaster) {
 			case CricketUtil.DOAD_TRIO:
