@@ -3,7 +3,6 @@ package com.cricket.broadcaster;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,20 +10,20 @@ import javax.xml.bind.JAXBException;
 
 import com.cricket.containers.Scene;
 import com.cricket.controller.IndexController;
+import com.cricket.model.BattingCard;
 import com.cricket.model.Inning;
 import com.cricket.model.MatchAllData;
 import com.cricket.model.Player;
-import com.cricket.model.Team;
 import com.cricket.service.CricketService;
 import com.cricket.util.CricketFunctions;
 import com.cricket.util.CricketUtil;
-
-import net.sf.json.JSONArray;
 
 public class DOAD_TRIO extends Scene{
 	
 	public char return_key = (char) 13;
 	public char line_feed = (char) 10;
+	
+	public Inning inning;
 	
 	public DOAD_TRIO() {
 		super();
@@ -53,7 +52,6 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[3]);
 			break;
 		case "POPULATE_GRAPHICS_ISPL_TAPE":
-			
 			if(valueToProcess.split(",")[0].equalsIgnoreCase("drone")) {
 				DoadWriteToTrio(print_writer, "read_template TAPE-BALL-OVERS_PLAYER_DRONE");
 			}else {
@@ -62,6 +60,7 @@ public class DOAD_TRIO extends Scene{
 			popualteIsplTape(print_writer, Integer.valueOf(valueToProcess.split(",")[1]),match, cricketService);
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[2]);
 			break;
+			
 		case"POPULATE_GRAPHICS_COMPARISION":
 			DoadWriteToTrio(print_writer, "read_template Comparison");
 			populateComparison(print_writer, match);
@@ -72,6 +71,7 @@ public class DOAD_TRIO extends Scene{
 			populateNextToBat(print_writer,match, cricketService);
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;
+			
 		case "POPULATE_GRAPHICS":
 			Map<String, String> mp = IndexController.getDataFromExcelFile();
 			String [] str =mp.get(valueToProcess).split("\n");
@@ -88,8 +88,6 @@ public class DOAD_TRIO extends Scene{
 		return null;
 	}
 	 
-
-	
 	public void PopulateGraphics(PrintWriter print_writer,String[] str) {
 		//DoadWriteToTrio(print_writer, "page:read_internal /storage/shows/{0CAF4F6A-629C-4D6E-A3F8-DF6F7ED0A5DB}/elements/101");
 		for (int i = 6; i < str.length; i++) {
@@ -133,7 +131,7 @@ public class DOAD_TRIO extends Scene{
 		
 	 }
 	 
-	 public void popualteIspl50_50(PrintWriter print_writer,int player_id,String cr_value,MatchAllData match, CricketService cricketService) {
+	public void popualteIspl50_50(PrintWriter print_writer,int player_id,String cr_value,MatchAllData match, CricketService cricketService) {
 		 Player player = CricketFunctions.getPlayerFromMatchData(player_id ,match);
 		 String photo = "";
 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME " +(player.getTeamId()==match.getSetup().getHomeTeamId() ?
@@ -153,8 +151,7 @@ public class DOAD_TRIO extends Scene{
 		}
 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 014-PLAYER-IMAGE " +photo);
 	 }
-	 private void popualteIsplTape(PrintWriter print_writer, Integer player_id, MatchAllData match,
-				CricketService cricketService) {
+	private void popualteIsplTape(PrintWriter print_writer, Integer player_id, MatchAllData match, CricketService cricketService) {
 		 Player player = CricketFunctions.getPlayerFromMatchData(player_id ,match);
 		 String photo = "";
 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME " +(player.getTeamId()==match.getSetup().getHomeTeamId() ?
@@ -171,45 +168,70 @@ public class DOAD_TRIO extends Scene{
 						match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+player.getPhoto()+CricketUtil.PNG_EXTENSION;
 		}
 		DoadWriteToTrio(print_writer,  "tabfield:set_value_no_update 004-PLAYER-IMAGE \"" + photo + "\"");
-		}
-	 	private void populateComparison(PrintWriter print_writer,MatchAllData match) {
-	 		
-	 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME " + (match.getSetup().getHomeTeamId()==
-	 				 match.getMatch().getInning().get(1).getBowlingTeamId() ? match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4() ));
-			 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME02 "+(match.getSetup().getHomeTeamId()==
-	 				 match.getMatch().getInning().get(1).getBattingTeamId() ? match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4() ));			 
-			 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-HEADER "+"AFTER "+
-			 CricketFunctions.getOvers(match.getMatch().getInning().get(1).getTotalOvers(), match.getMatch().getInning().get(1).getTotalBalls())+" OVERS");
-			 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 014-STAT-VALUE1 "+ match.getMatch().getInning().get(1).getTotalRuns()+"/"+
-					 match.getMatch().getInning().get(1).getTotalWickets());
-			 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 013-STAT-VALUE1 "+ CricketFunctions.compareInningData(match, "/", 1, match.getEventFile().getEvents()));
-		}
+	}
+ 	private void populateComparison(PrintWriter print_writer,MatchAllData match) {
+ 		
+ 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME " + (match.getSetup().getHomeTeamId()==
+ 				 match.getMatch().getInning().get(1).getBowlingTeamId() ? match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4() ));
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME02 "+(match.getSetup().getHomeTeamId()==
+ 				 match.getMatch().getInning().get(1).getBattingTeamId() ? match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4() ));			 
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-HEADER "+"AFTER "+
+		 CricketFunctions.getOvers(match.getMatch().getInning().get(1).getTotalOvers(), match.getMatch().getInning().get(1).getTotalBalls())+" OVERS");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 014-STAT-VALUE1 "+ match.getMatch().getInning().get(1).getTotalRuns()+"/"+
+				 match.getMatch().getInning().get(1).getTotalWickets());
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 013-STAT-VALUE1 "+ CricketFunctions.compareInningData(match, "/", 1, match.getEventFile().getEvents()));
+	}
 
-		private void populateNextToBat(PrintWriter print_writer, MatchAllData match, CricketService cricketService) {
-			// TODO Auto-generated method stub
+	private void populateNextToBat(PrintWriter print_writer, MatchAllData match, CricketService cricketService) {
+		
+		inning = match.getMatch().getInning().stream().filter(inn -> inn.getIsCurrentInning().equalsIgnoreCase(CricketUtil.YES)).findAny().orElse(null);
+		
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-HEADER " + "NEXT TO BAT");
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 00-REF-NAME " + (match.getSetup().getHomeTeamId() == inning.getBattingTeamId() ? 
+				match.getSetup().getHomeTeam().getTeamName4() : match.getSetup().getAwayTeam().getTeamName4()));
+		
+		int rowId = 0;
+		int position = 0;
+		for(BattingCard bc : inning.getBattingCard()) {
+			position++;
+			if(rowId>=3) break;
+			switch (bc.getStatus()) {
+			case CricketUtil.STILL_TO_BAT:
+				if(bc.getHowOut() != null && !bc.getHowOut().equalsIgnoreCase(CricketUtil.RETIRED_HURT)) continue;
+				rowId++;
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 01-PLAYER-IMAGE " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				DoadWriteToTrio(print_writer, "table:set_cell_value 002_List 001-SCORE-POSITION-OMO " + "0");
+				break;
+			}
 			
 		}
+	}
 
-	 public void DoadWriteToTrio(PrintWriter print_writer,String sendCommand) {
+	public void DoadWriteToTrio(PrintWriter print_writer,String sendCommand) {
 		print_writer.println(sendCommand + return_key + line_feed);
-	 }
+	}
 	
-	 public static String[] splitString(String str) {
-	        int index = str.indexOf("\t");
-	        List<String> parts = new ArrayList<>();
-	        
-	        if (index != -1) {
-	            parts.add(str.substring(0, index));
-	            String[] rest = str.substring(index + 1).split("\t");
-	            for (String part : rest) {
-	                if (!part.isEmpty()) {
-	                    parts.add(part.trim());
-	                }
+	public static String[] splitString(String str) {
+	    int index = str.indexOf("\t");
+	    List<String> parts = new ArrayList<>();
+	    
+	    if (index != -1) {
+	        parts.add(str.substring(0, index));
+	        String[] rest = str.substring(index + 1).split("\t");
+	        for (String part : rest) {
+	            if (!part.isEmpty()) {
+	                parts.add(part.trim());
 	            }
-	        } else {
-	            parts.add(str);
 	        }
-	        
-	        return parts.toArray(new String[0]);
+	    } else {
+	        parts.add(str);
 	    }
+	    
+	    return parts.toArray(new String[0]);
+	}
 }
