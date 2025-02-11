@@ -63,7 +63,7 @@ public class IndexController
 	@Autowired
 	CricketService cricketService;
 	
-	public static String expiry_date = "2024-12-31";
+	public static String expiry_date = "2025-12-31";
 	public static String current_date = "";
 	public static String error_message = "";
 	public static DOAD_TRIO this_DOAD_TRIO;
@@ -76,7 +76,7 @@ public class IndexController
 	public static String session_selected_broadcaster;
 	public static Socket session_socket;
 	public static PrintWriter print_writer;
-	
+	public static Inning inning;
 	
 	@RequestMapping(value = {"/","/initialise"}, method={RequestMethod.GET,RequestMethod.POST}) 
 	public String initialisePage(ModelMap model) throws JAXBException, IOException 
@@ -181,15 +181,17 @@ public class IndexController
 	{
 		//System.out.println("session_selected_broadcaster = " + session_selected_broadcaster);
 		switch (whatToProcess.toUpperCase()) {
-			case "GRAPHIC_OPTIONS":
-				Map<String,String> map =getDataFromExcelFile();
-			 return JSONArray.fromObject(map.keySet()).toString();
-			
+		case "GRAPHIC_OPTIONS":
+			Map<String,String> map =getDataFromExcelFile();
+			return JSONArray.fromObject(map.keySet()).toString();
+		case "ISPL_50_50_GRAPHIC_OPTIONS": case "ISPL_BALL_GRAPHIC_OPTIONS":
+			inning = session_match.getMatch().getInning().stream().filter(inn -> inn.getIsCurrentInning().equalsIgnoreCase(CricketUtil.YES)).findAny().orElse(null);
+			return JSONArray.fromObject(inning.getBowlingTeamId() == session_match.getSetup().getHomeTeamId() ? session_match.getSetup().getHomeSquad() 
+					: session_match.getSetup().getAwaySquad()).toString();
 		default:
 			switch (session_selected_broadcaster) {
 			case CricketUtil.DOAD_TRIO:
-				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, print_writer, session_selected_scenes, valueToProcess);
-				break;
+				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, session_selected_scenes, valueToProcess);
 			}
 			return JSONObject.fromObject(session_match).toString();
 		}

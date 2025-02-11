@@ -34,11 +34,35 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			addItemsToList('LOAD_GRAPHICS-OPTION',null)
 			break;
 		case 112://F1 - graphics_options
-		$("#captions_div").hide();
-		$("#cancel_match_setup_btn").hide();
-		$("#expiry_message").hide();
-		processCricketProcedures('GRAPHIC_OPTIONS');
-		break;
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('GRAPHIC_OPTIONS');
+			break;
+		case 90://Z - ISPL 50-50
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_50_50_GRAPHIC_OPTIONS');
+			break;
+		case 88://X - TAPE BALL
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_BALL_GRAPHIC_OPTIONS');
+			break;
+		case 67://C - TAPE BALL
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('COMPARISION_GRAPHIC_OPTIONS');
+			break;
+		case 78://N - TAPE BALL
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_NEXT_BAT_GRAPHIC_OPTIONS');
+			break;
 		}
 		
 		break;
@@ -67,7 +91,7 @@ function processUserSelection(whichInput)
 	case 'cancel_graphics_btn':
 		$('#select_graphic_options_div').empty();
 		document.getElementById('select_graphic_options_div').style.display = 'none';
-		//$("#captions_div").show();
+		$("#captions_div").show();
 		$("#main_captions_div").show();
 		
 		break;
@@ -76,7 +100,19 @@ function processUserSelection(whichInput)
 		break;	
 	case 'populate_graphics':
 		processCricketProcedures('POPULATE_GRAPHICS');
-		break;	
+		break;
+	case 'populate_graphics_ispl_50_50':
+		processCricketProcedures('POPULATE_GRAPHICS_ISPL_50_50');
+		break;
+	case 'populate_graphics_ispl_ball':
+		processCricketProcedures('POPULATE_GRAPHICS_ISPL_TAPE');
+		break;
+	case"populate_graphics_COMPARISION":
+		processCricketProcedures('POPULATE_GRAPHICS_COMPARISION');
+		break;
+	case"populate_graphics_nextToBat":
+		processCricketProcedures('POPULATE_GRAPHICS_NEXT_TO_BAT');
+		break;
 	case 'load_scene_btn':
 		/*if(checkEmpty($('#vizIPAddress'),'IP Address Blank') == false
 			|| checkEmpty($('#vizPortNumber'),'Port Number Blank') == false) {
@@ -96,7 +132,16 @@ function processCricketProcedures(whatToProcess)
 		break;	
 	case 'POPULATE_GRAPHICS':
 		valueToProcess = $('#selectGraphics').val();
-		break;	
+		break;
+	case 'POPULATE_GRAPHICS_ISPL_50_50':
+		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ',' + $('#challengeRuns').val() + ',' + $('#savePointsTable').val();
+		break;
+	case 'POPULATE_GRAPHICS_ISPL_TAPE':
+		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ','  + $('#savePointsTable').val();
+		break;
+	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":
+			valueToProcess = $('#savePointsTable').val();
+	break;
 	}
 
 	$.ajax({    
@@ -115,6 +160,18 @@ function processCricketProcedures(whatToProcess)
 			case 'GRAPHIC_OPTIONS':
 				addItemsToList('GRAPHICS',data);
 				break;
+			case 'ISPL_50_50_GRAPHIC_OPTIONS':
+				addItemsToList('ISPL_50_50_OPTIONS',data);
+				break;
+			case 'ISPL_BALL_GRAPHIC_OPTIONS':
+				addItemsToList('ISPL_BALL_OPTIONS',data);
+				break;
+			case'ISPL_NEXT_BAT_GRAPHIC_OPTIONS':
+				addItemsToList('ISPL_NEXT_BAT_OPTIONS',data);
+				break;
+			case'COMPARISION_GRAPHIC_OPTIONS':
+				addItemsToList('ISPL_COMPARISION_OPTIONS',data);
+				break;
         	}
 			processWaitingButtonSpinner('END_WAIT_TIMER');
 	    },    
@@ -128,7 +185,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 	var select,option,header_text,div,table,tbody,row;
 	
 	switch(whatToProcess){
-		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS':
+		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -182,6 +239,138 @@ function addItemsToList(whatToProcess, dataToProcess)
 						    
 							document.getElementById('select_graphic_options_div').style.display = '';
 							break;
+					case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
+					 	select = document.createElement('input');
+						select.type = "text";
+						select.id = 'savePointsTable';
+						select.value = '';
+						
+						header_text = document.createElement('label');
+						header_text.innerHTML = 'Page No.';
+						header_text.htmlFor = select.id;
+						row.insertCell(0).appendChild(header_text).appendChild(select);
+
+				    	option = document.createElement('input');
+					    option.type = 'button';
+					    switch(whatToProcess){
+						case 'ISPL_NEXT_BAT_OPTIONS': 
+							option.name = 'populate_graphics_nextToBat';
+							option.value = 'populate';
+							break;
+						case 'ISPL_COMPARISION_OPTIONS':
+							option.name = 'populate_graphics_COMPARISION';
+							option.value = 'populate';
+							break;
+						}
+						
+					    option.id = option.name;
+					    option.setAttribute('onclick',"processUserSelection(this)");
+					    
+					    div = document.createElement('div');
+					    div.append(option);
+					
+						option = document.createElement('input');
+						option.type = 'button';
+						option.name = 'cancel_graphics_btn';
+						option.id = option.name;
+						option.value = 'Cancel';
+						option.setAttribute('onclick','processUserSelection(this)');
+					
+					    div.append(option);
+					    
+					    row.insertCell(1).appendChild(div);
+					    
+						document.getElementById('select_graphic_options_div').style.display = '';
+					break;
+					case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':
+						cellCount = 0;
+						select = document.createElement('select');
+					    select.style.width = '130px';
+					    select.id = 'whichScene';
+					    select.name = select.id;
+					    
+					    option = document.createElement('option');
+			         	option.value = 'drone';
+			        	option.text = 'Drone';
+			         	select.appendChild(option);
+			         	
+			         	option = document.createElement('option');
+			         	option.value = 'spider';
+			        	option.text = 'Spider';
+			         	select.appendChild(option);
+			         	
+					    row.insertCell(cellCount).appendChild(select);
+					    cellCount++;
+					    
+					    select = document.createElement('select');
+					    select.style.width = '130px';
+					    select.id = 'whichPlayer';
+					    select.name = select.id;
+					    for (let i = 0; i < dataToProcess.length; i++) {
+					         option = document.createElement('option');
+					         option.value = dataToProcess[i].playerId;
+					         option.text = dataToProcess[i].full_name;
+					         select.appendChild(option);
+					    }
+					    row.insertCell(cellCount).appendChild(select);
+					    cellCount++;
+					    
+					    if(whatToProcess == 'ISPL_50_50_OPTIONS'){
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'challengeRuns';
+							select.value = '10';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Challenge Runs';
+							header_text.htmlFor = select.id;
+							row.insertCell(cellCount).appendChild(header_text).appendChild(select);
+						    cellCount++;
+						}
+					    
+					    select = document.createElement('input');
+						select.type = "text";
+						select.id = 'savePointsTable';
+						select.value = '';
+						
+						header_text = document.createElement('label');
+						header_text.innerHTML = 'Page No.';
+						header_text.htmlFor = select.id;
+						row.insertCell(cellCount).appendChild(header_text).appendChild(select);
+					    cellCount++;
+					
+				    	option = document.createElement('input');
+					    option.type = 'button';
+					    switch(whatToProcess){
+						case 'ISPL_50_50_OPTIONS': 
+							option.name = 'populate_graphics_ispl_50_50';
+							option.value = 'populate graphics ispl 50-50';
+							break;
+						case 'ISPL_BALL_OPTIONS':
+							option.name = 'populate_graphics_ispl_ball';
+							option.value = 'populate graphics ispl Ball';
+							break;
+						}
+						
+					    option.id = option.name;
+					    option.setAttribute('onclick',"processUserSelection(this)");
+					    
+					    div = document.createElement('div');
+					    div.append(option);
+					
+						option = document.createElement('input');
+						option.type = 'button';
+						option.name = 'cancel_graphics_btn';
+						option.id = option.name;
+						option.value = 'Cancel';
+						option.setAttribute('onclick','processUserSelection(this)');
+					
+					    div.append(option);
+					    
+					    row.insertCell(cellCount).appendChild(div);
+					    
+						document.getElementById('select_graphic_options_div').style.display = '';
+						break;
 						
 					case 'GRAPHICS':
 					    cellCount = 0; 
@@ -199,29 +388,29 @@ function addItemsToList(whatToProcess, dataToProcess)
 					    row.insertCell(cellCount).appendChild(select);
 					    cellCount++;
 					
-					    	option = document.createElement('input');
-						    option.type = 'button';
-							option.name = 'populate_graphics';
-							option.value = 'populate graphics';
-						    option.id = option.name;
-						    option.setAttribute('onclick',"processUserSelection(this)");
-						    
-						    div = document.createElement('div');
-						    div.append(option);
-						
-							option = document.createElement('input');
-							option.type = 'button';
-							option.name = 'cancel_graphics_btn';
-							option.id = option.name;
-							option.value = 'Cancel';
-							option.setAttribute('onclick','processUserSelection(this)');
-						
-						    div.append(option);
-						    
-						    row.insertCell(1).appendChild(div);
-						    
-							document.getElementById('select_graphic_options_div').style.display = '';
-							break;
+				    	option = document.createElement('input');
+					    option.type = 'button';
+						option.name = 'populate_graphics';
+						option.value = 'populate graphics';
+					    option.id = option.name;
+					    option.setAttribute('onclick',"processUserSelection(this)");
+					    
+					    div = document.createElement('div');
+					    div.append(option);
+					
+						option = document.createElement('input');
+						option.type = 'button';
+						option.name = 'cancel_graphics_btn';
+						option.id = option.name;
+						option.value = 'Cancel';
+						option.setAttribute('onclick','processUserSelection(this)');
+					
+					    div.append(option);
+					    
+					    row.insertCell(1).appendChild(div);
+					    
+						document.getElementById('select_graphic_options_div').style.display = '';
+						break;
 
 					}
 					break;

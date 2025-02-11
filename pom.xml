@@ -22,7 +22,7 @@
     <groupId>com.cricket</groupId>
     <artifactId>CricketLibrary</artifactId>
     <scope>compile</scope>
-    <version>1.326</version>
+    <version>1.458</version>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
@@ -308,7 +308,7 @@
 <dependency>
     <groupId>org.springframework</groupId>
     <artifactId>spring-aspects</artifactId>
-    <version>4.1.4.RELEASE</version>
+    <version>6.2.1</version>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/org.springframework/spring-beans -->
