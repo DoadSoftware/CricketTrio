@@ -177,7 +177,7 @@ public class IndexController
 	public @ResponseBody String processCricketProcedures(
 			@RequestParam(value = "whatToProcess", required = false, defaultValue = "") String whatToProcess,
 			@RequestParam(value = "valueToProcess", required = false, defaultValue = "") String valueToProcess)  
-					throws IOException, IllegalAccessException, InvocationTargetException, JAXBException, InterruptedException, ParseException 
+					throws Exception 
 	{
 		//System.out.println("session_selected_broadcaster = " + session_selected_broadcaster);
 		switch (whatToProcess.toUpperCase()) {
@@ -190,6 +190,8 @@ public class IndexController
 					: session_match.getSetup().getAwaySquad()).toString();
 		case "ISPL_LINEUP_GRAPHIC_OPTIONS":
 			return JSONObject.fromObject(session_match.getSetup()).toString();
+		case "ISPL_PREVIOUS_MATCH_SUMMARY_GRAPHIC_OPTIONS":
+			return JSONArray.fromObject(CricketFunctions.processAllFixtures(cricketService)).toString();
 		default:
 			switch (session_selected_broadcaster) {
 			case CricketUtil.DOAD_TRIO:

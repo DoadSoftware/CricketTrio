@@ -63,11 +63,23 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_NEXT_BAT_GRAPHIC_OPTIONS');
 			break;
-		case 113://M - LINEUP
+		case 113://F2 - LINEUP
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_LINEUP_GRAPHIC_OPTIONS');
+			break;
+		case 114://F3 - PREVIOUS MATCH SUMMARY
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_PREVIOUS_MATCH_SUMMARY_GRAPHIC_OPTIONS');
+			break;
+		case 115://F5 - MATCH SUMMARY
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			addItemsToList('POPULATE_FF_CURRENT_MATCH_SUMMARY',null);
 			break;
 		}
 		
@@ -110,6 +122,12 @@ function processUserSelection(whichInput)
 	case 'populate_graphics_ispl_50_50':
 		processCricketProcedures('POPULATE_GRAPHICS_ISPL_50_50');
 		break;
+	case 'FF_MATCH_SUMMARY':
+		processCricketProcedures('POPULATE_GRAPHICS_ISPL_FF_MATCH_SUMMARY');
+		break;
+	case 'FF_CURRENT_MATCH_SUMMARY':
+		processCricketProcedures("POPULATE_ISPL_FF_MATCH_SUMMARY");
+		break;
 	case 'populate_graphics_ispl_ball':
 		processCricketProcedures('POPULATE_GRAPHICS_ISPL_TAPE');
 		break;
@@ -145,10 +163,13 @@ function processCricketProcedures(whatToProcess)
 	case 'POPULATE_GRAPHICS_ISPL_50_50':
 		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ',' + $('#challengeRuns').val() + ',' + $('#savePointsTable').val();
 		break;
+	case "POPULATE_GRAPHICS_ISPL_FF_MATCH_SUMMARY":
+			valueToProcess = $('#selectMatchPromo').val() + ',' + $('#savePointsTable').val();
+		break;
 	case 'POPULATE_GRAPHICS_ISPL_TAPE':
 		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ','  + $('#savePointsTable').val();
 		break;
-	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":
+	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":case "POPULATE_ISPL_FF_MATCH_SUMMARY":
 			valueToProcess = $('#savePointsTable').val();
 	break;
 	case "POPULATE_GRAPHICS_LINEUP":
@@ -187,6 +208,9 @@ function processCricketProcedures(whatToProcess)
 			case "ISPL_LINEUP_GRAPHIC_OPTIONS":
 				addItemsToList('ISPL_LINEUP_OPTIONS',data);
 				break;
+			case "ISPL_PREVIOUS_MATCH_SUMMARY_GRAPHIC_OPTIONS":
+				addItemsToList('ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS',data);
+				break;
         	}
 			processWaitingButtonSpinner('END_WAIT_TIMER');
 	    },    
@@ -201,7 +225,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 	
 	switch(whatToProcess){
 		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
-		case "ISPL_LINEUP_OPTIONS":
+		case "ISPL_LINEUP_OPTIONS":case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":case 'POPULATE_FF_CURRENT_MATCH_SUMMARY':
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -220,6 +244,54 @@ function addItemsToList(whatToProcess, dataToProcess)
 					
 					row = tbody.insertRow(tbody.rows.length);
 					switch(whatToProcess){
+						case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":
+							select = document.createElement('select');
+							select.id = 'selectMatchPromo';
+							select.name = select.id;
+							console.log(dataToProcess);
+							dataToProcess.forEach(function(oop){	
+								option = document.createElement('option');
+					            option.value = oop.matchnumber;
+					            option.text = oop.matchnumber + ' - ' +oop.home_Team.teamName1 + ' Vs ' + oop.away_Team.teamName1 ;
+					            select.appendChild(option);
+					            console.log(oop.matchnumber + ' - ' + oop.home_Team.teamName1 + ' Vs ' + oop.away_Team.teamName1);
+					        });
+						    row.insertCell(0).appendChild(select);
+
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(1).appendChild(header_text).appendChild(select);
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'FF_MATCH_SUMMARY';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(2).appendChild(div);
+						    
+							document.getElementById('select_graphic_options_div').style.display = '';
+						break;
 						case "ISPL_LINEUP_OPTIONS":
 							select = document.createElement('select');
 						    select.style.width = '250px';
@@ -307,7 +379,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 						    
 							document.getElementById('select_graphic_options_div').style.display = '';
 							break;
-					case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
+					case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':case 'POPULATE_FF_CURRENT_MATCH_SUMMARY':
 					 	select = document.createElement('input');
 						select.type = "text";
 						select.id = 'savePointsTable';
@@ -329,6 +401,10 @@ function addItemsToList(whatToProcess, dataToProcess)
 							option.name = 'populate_graphics_COMPARISION';
 							option.value = 'populate';
 							break;
+						case 'POPULATE_FF_CURRENT_MATCH_SUMMARY':
+							option.name = 'FF_CURRENT_MATCH_SUMMARY';
+							option.value = 'populate';
+						break;
 						}
 						
 					    option.id = option.name;
@@ -350,6 +426,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 					    
 						document.getElementById('select_graphic_options_div').style.display = '';
 					break;
+					
 					case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':
 						cellCount = 0;
 						select = document.createElement('select');

@@ -1,8 +1,12 @@
 package com.cricket.broadcaster;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,13 +15,23 @@ import javax.xml.bind.JAXBException;
 import com.cricket.containers.Scene;
 import com.cricket.controller.IndexController;
 import com.cricket.model.BattingCard;
+import com.cricket.model.BowlingCard;
+import com.cricket.model.Event;
+import com.cricket.model.EventFile;
+import com.cricket.model.Fixture;
+import com.cricket.model.Ground;
 import com.cricket.model.Inning;
+import com.cricket.model.Match;
 import com.cricket.model.MatchAllData;
 import com.cricket.model.Player;
+import com.cricket.model.Setup;
 import com.cricket.model.Team;
 import com.cricket.service.CricketService;
 import com.cricket.util.CricketFunctions;
 import com.cricket.util.CricketUtil;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DOAD_TRIO extends Scene{
 	
@@ -31,9 +45,7 @@ public class DOAD_TRIO extends Scene{
 	}
 	
 	public Object ProcessGraphicOption(String whatToProcess, CricketService cricketService, MatchAllData match, PrintWriter print_writer, List<Scene> scenes, 
-			String valueToProcess) throws IOException, JAXBException {
-		System.out.println(whatToProcess.toUpperCase());
-		System.out.println(valueToProcess);
+			String valueToProcess) throws Exception{
 		switch(whatToProcess.toUpperCase()) {
 		//Load Scene
 		case "LOAD_GRAPHICS":
@@ -52,6 +64,30 @@ public class DOAD_TRIO extends Scene{
 			}
 			popualteIspl50_50(print_writer, Integer.valueOf(valueToProcess.split(",")[1]), valueToProcess.split(",")[2],match, cricketService);
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[3]);
+			break;
+		case "POPULATE_GRAPHICS_ISPL_FF_MATCH_SUMMARY": case "POPULATE_ISPL_FF_MATCH_SUMMARY":
+			DoadWriteToTrio(print_writer, "read_template FF_Match_Summary");
+			MatchAllData previous_match = new MatchAllData();
+			if(whatToProcess.equalsIgnoreCase("POPULATE_GRAPHICS_ISPL_FF_MATCH_SUMMARY")) {
+				Fixture fixture = cricketService.getFixtures().stream().filter(fix -> fix.getMatchnumber() == Integer.valueOf(valueToProcess.split(",")[0])).findAny().orElse(null);
+				if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
+					previous_match.setSetup(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + 
+							fixture.getMatchfilename() + ".json"), Setup.class));
+					previous_match.setMatch(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY + 
+							fixture.getMatchfilename() + ".json"), Match.class));
+				}
+				if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
+					previous_match.setEventFile(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + 
+							fixture.getMatchfilename() + ".json"), EventFile.class));
+				}
+				
+				previous_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ, 
+						CricketUtil.SETUP + "," + CricketUtil.MATCH, previous_match));
+			}else {
+				previous_match = match;
+			}
+			popualteIspl_MATCH_SUMMARY(print_writer,previous_match, cricketService);
+			DoadWriteToTrio(print_writer, "saveas " + (valueToProcess.split(",").length >1 ? valueToProcess.split(",")[1] :valueToProcess.split(",")[0]));
 			break;
 		case "POPULATE_GRAPHICS_ISPL_TAPE":
 			if(valueToProcess.split(",")[0].equalsIgnoreCase("drone")) {
@@ -94,6 +130,199 @@ public class DOAD_TRIO extends Scene{
 		return null;
 	}
 	 
+	
+	private void popualteIspl_MATCH_SUMMARY(PrintWriter print_writer, MatchAllData previous_match, CricketService cricketService) throws Exception {		
+		//HEADER
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-TEAM-REF-NAME-1 " +  
+				previous_match.getSetup().getHomeTeam().getTeamName1());
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-TEAM-REF-NAME-2 " +  
+				previous_match.getSetup().getAwayTeam().getTeamName1());
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-TEAM-NAME " +  
+				previous_match.getSetup().getHomeTeam().getTeamName1());
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-TEAM-NAME " +  
+				previous_match.getSetup().getAwayTeam().getTeamName1());
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-HEADER " + "SUMMARY");
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 004-SUB-HEADER " + previous_match.getSetup().getTournament() + " - " + previous_match.getSetup().getMatchIdent());
+		//BODY
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-OVERS-VALUE " +  
+				CricketFunctions.OverBalls(previous_match.getMatch().getInning().get(0).getTotalOvers(),
+						previous_match.getMatch().getInning().get(0).getTotalBalls()));
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-SCORE-VALUE " +  
+				CricketFunctions.getTeamScore(previous_match.getMatch().getInning().get(0),"-", false));
+		
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-OVERS-VALUE " +  
+				CricketFunctions.OverBalls(previous_match.getMatch().getInning().get(1).getTotalOvers(),
+						previous_match.getMatch().getInning().get(0).getTotalBalls()));
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-SCORE-VALUE " +  
+				CricketFunctions.getTeamScore(previous_match.getMatch().getInning().get(1),"-", false));
+		for(int i = 1; i <= 2 ; i++) {
+			DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"008":"012")+"-SELECT-CHALLENGE 0");
+			String tapeData = getBowlerRunsOverbyOver(i, previous_match.getEventFile().getEvents(), previous_match);
+			if(i == 1) {
+				if(previous_match.getSetup().getTargetOvers() != null && !previous_match.getSetup().getTargetOvers().trim().isEmpty()) {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-DLS-VALUE " +"(" + previous_match.getSetup().getTargetOvers() + ")");
+					
+				}
+				if(previous_match.getMatch().getInning().get(i-1).getBattingTeamId() == previous_match.getSetup().getTossWinningTeam()) {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-SELECT-TOSS 1");
+
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-SELECT-TOSS 0");
+				}
+			}else {
+				if(previous_match.getSetup().getTargetOvers() != null && !previous_match.getSetup().getTargetOvers().trim().isEmpty()) {
+					if((Integer.valueOf(previous_match.getSetup().getTargetOvers())*6) != 
+							((previous_match.getMatch().getInning().get(0).getTotalOvers()*6)+previous_match.getMatch().getInning().get(0).getTotalBalls())) {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-DLS-VALUE " +"(" + previous_match.getSetup().getTargetOvers() + ")");
+
+					}else {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-DLS-VALUE " +"(" + previous_match.getSetup().getTargetOvers() + ")");
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-DLS-VALUE " +"(" + previous_match.getSetup().getTargetOvers() + ")");
+
+					}
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 005-DLS-VALUE " +"");
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-DLS-VALUE " +"");
+	
+				}
+				if(previous_match.getMatch().getInning().get(i-1).getBattingTeamId() == previous_match.getSetup().getTossWinningTeam()) {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-SELECT-TOSS 1");
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 012-SELECT-TOSS 0");
+				}
+			}
+			if(previous_match.getMatch().getInning().get(i-1).getBattingCard() != null) {
+				Collections.sort(previous_match.getMatch().getInning().get(i-1).getBattingCard(),new CricketFunctions.BatsmenScoreComparator());
+				int rowId =0;
+				for(BattingCard bc : previous_match.getMatch().getInning().get(i-1).getBattingCard()) {
+					if(rowId >=3) break;
+					if(bc.getRuns() > 0) {
+						rowId++;
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+(previous_match.getMatch().getInning().get(i-1).getInningNumber()==1?"0":"")+((6*previous_match.getMatch().getInning().get(i-1).getInningNumber())+(rowId-1))
+									+"-BATSMAN-NAME "+ bc.getPlayer().getTicker_name());
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+(previous_match.getMatch().getInning().get(i-1).getInningNumber()==1?"0":"")+((6*previous_match.getMatch().getInning().get(i-1).getInningNumber())+(rowId-1))
+									+"-BATSMAN-RUNS "+ bc.getRuns()+(bc.getStatus().equalsIgnoreCase("OUT")?"":"* "));
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+(previous_match.getMatch().getInning().get(i-1).getInningNumber()==1?"0":"")+((6*previous_match.getMatch().getInning().get(i-1).getInningNumber())+(rowId-1))
+									+"-BATSMAN-BALLS "+ bc.getBalls());
+						String photo = "";
+						if(IndexController.session_Configurations.getPrimaryIpAddress().equalsIgnoreCase("LOCALHOST")) {
+							photo = "C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+(bc.getPlayer().getTeamId()==previous_match.getSetup().getHomeTeamId() ?previous_match.getSetup().getHomeTeam().getTeamName4() : 
+								previous_match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+bc.getPlayer().getPhoto()+CricketUtil.PNG_EXTENSION;
+						}else {
+							photo = "\\\\\\\\"+IndexController.session_Configurations.getPrimaryIpAddress()+"\\\\\\\\c\\\\\\\\Images\\\\\\\\ISPL\\\\\\\\PHOTOS\\\\\\\\"+
+									(bc.getPlayer().getTeamId()==previous_match.getSetup().getHomeTeamId() ?previous_match.getSetup().getHomeTeam().getTeamName4() : 
+										previous_match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\\\\\"+bc.getPlayer().getPhoto()+CricketUtil.PNG_EXTENSION;
+						}
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+(previous_match.getMatch().getInning().get(i-1).getInningNumber()==1?"0":"")+((6*previous_match.getMatch().getInning().get(i-1).getInningNumber())+(rowId-1))
+									+"-BATSMAN-IMG "+photo);
+
+					}
+				}
+				ArrayList<Event> tapeBall = new ArrayList<Event>();
+				int log_50_bowlerNo = 0;
+				for(int j= previous_match.getEventFile().getEvents().size()-1;j >= 0 ; j--) {
+					if(previous_match.getEventFile().getEvents().get(j).getEventInningNumber() == previous_match.getMatch().getInning().get(i-1).getInningNumber()) {
+						if(previous_match.getEventFile().getEvents().get(j).getEventType().equalsIgnoreCase(CricketUtil.LOG_50_50)) {
+							log_50_bowlerNo = previous_match.getEventFile().getEvents().get(j).getEventBowlerNo();
+							if(previous_match.getEventFile().getEvents().get(j).getEventExtra().equalsIgnoreCase("-")) {
+								DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"008":"014")+"-SELECT-CHALLENGE 1");
+								DoadWriteToTrio(print_writer, "tabfield:set_value_no_update " + (i == 1 ? "008-NEG-CHALLENGE-VALUE" : "014-CHALLENGE-VALUE") + " "
+										+ previous_match.getEventFile().getEvents().get(j).getEventExtraRuns());
+							}
+							else if(previous_match.getEventFile().getEvents().get(j).getEventExtra().equalsIgnoreCase("+")) {
+								DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"008":"014")+"-SELECT-CHALLENGE 2");
+								DoadWriteToTrio(print_writer, "tabfield:set_value_no_update " + (i == 1 ? "008-POS-CHALLENGE-VALUE" : "014-CHALLENGE-VALUE") + " "
+										+ previous_match.getEventFile().getEvents().get(j).getEventExtraRuns());
+							}
+						}
+						if(previous_match.getEventFile().getEvents().get(j).getEventExtra() != null) {
+							if(previous_match.getEventFile().getEvents().get(j).getEventExtra().equalsIgnoreCase("TAPE")) {
+								tapeBall.add(previous_match.getEventFile().getEvents().get(j));
+							}
+						}
+					}
+				}
+				if(tapeBall.size()>0) {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"011":"017")+"-TAPEBALL-VALUE "+tapeData.split(",")[1]);
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"011":"017")+"-TAPEBALL-OVERS "+tapeBall.size());
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"011":"017")+"-TAPEBALL-VALUE 0");
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update "+(i==1?"011":"017")+"-TAPEBALL-OVERS 0");
+				}
+				if(previous_match.getMatch().getInning().get(i-1).getBowlingCard() != null) {
+					Collections.sort(previous_match.getMatch().getInning().get(i-1).getBowlingCard(),new CricketFunctions.BowlerFiguresComparator());
+					 rowId = 0;
+					for(BowlingCard boc : previous_match.getMatch().getInning().get(i-1).getBowlingCard()) {
+						if(rowId >=3) break;
+							rowId++;
+							
+							for(Event evnt : tapeBall) {
+								String formattedValue = ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1) > 9) ? 
+				                         "" + ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1)) : 
+				                         "" + ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1));
+
+					
+								if(boc.getPlayerId() == log_50_bowlerNo) {
+									DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 2");
+									if(tapeBall.get(0).getEventBowlerNo() == boc.getPlayerId()) {
+										DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 1");
+									}
+									if(tapeBall.size() > 1) {
+										if(tapeBall.get(1).getEventBowlerNo() == boc.getPlayerId()) {
+											DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 1");
+										}
+									}
+									break;
+								}else {
+									if(evnt.getEventBowlerNo() == boc.getPlayerId()) {
+										DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 1");
+
+										if(tapeBall.size() == 2) {
+											if(tapeBall.get(0).getEventBowlerNo() == tapeBall.get(1).getEventBowlerNo()) {
+												DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 1");
+
+											}
+										}
+										break;
+									}else {
+										DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue+"-SELECT-OVERTYPE 0");
+									}
+								}
+							}
+						String formattedValue = ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1) > 9) ? 
+		                         "" + ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1)) : 
+		                         "0" + ((previous_match.getMatch().getInning().get(i - 1).getInningNumber()==1?9:15) + (rowId - 1));
+
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue
+									+"-BOWLER-NAME "+ boc.getPlayer().getTicker_name());
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue
+									+"-BOWLER-RUNS "+ (boc.getWickets()+"-"+boc.getRuns()));
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue
+									+"-BOWLER-BALLS "+ CricketFunctions.OverBalls(boc.getOvers(), boc.getBalls()));
+						String photo = "";
+						if(IndexController.session_Configurations.getPrimaryIpAddress().equalsIgnoreCase("LOCALHOST")) {
+							photo = "C:\\\\Images\\\\ISPL\\\\PHOTOS\\"+(boc.getPlayer().getTeamId()==previous_match.getSetup().getHomeTeamId() ?previous_match.getSetup().getHomeTeam().getTeamName4() : 
+								previous_match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\"+boc.getPlayer().getPhoto()+CricketUtil.PNG_EXTENSION;
+						}else {
+							photo = "\\\\\\\\"+IndexController.session_Configurations.getPrimaryIpAddress()+"\\\\\\\\c\\\\\\\\Images\\\\\\\\ISPL\\\\\\\\PHOTOS\\\\\\\\"+
+									(boc.getPlayer().getTeamId()==previous_match.getSetup().getHomeTeamId() ?previous_match.getSetup().getHomeTeam().getTeamName4() : 
+										previous_match.getSetup().getAwayTeam().getTeamName4() )+ "\\\\\\\\"+boc.getPlayer().getPhoto()+CricketUtil.PNG_EXTENSION;
+						}
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 0"+formattedValue
+									+"-BOWLER-IMG "+photo);
+					}
+				}
+			}
+		}
+		
+		//FOOTER
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 018-SELECT-FOOTER 2");
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 019-FOOTER-TEXT " +  
+				CricketFunctions.generateMatchSummaryStatus(2, previous_match,
+						CricketUtil.FULL, "", IndexController.session_Configurations.getBroadcaster(), true).replace("win", "won").toUpperCase());
+		
+	}
+
 	
 	public void PopulateGraphics(PrintWriter print_writer,String[] str) {
 		//DoadWriteToTrio(print_writer, "page:read_internal /storage/shows/{0CAF4F6A-629C-4D6E-A3F8-DF6F7ED0A5DB}/elements/101");
@@ -381,4 +610,66 @@ public class DOAD_TRIO extends Scene{
 	    
 	    return parts.toArray(new String[0]);
 	}
+public String getBowlerRunsOverbyOver(int inning,List<Event> event, MatchAllData matchAllData) {
+		
+		int bowlerId = 0,runs = 0,wicket = 0;
+		String name = "";
+		boolean bowler_found = false;
+		
+		if ((matchAllData.getEventFile().getEvents() != null) && (matchAllData.getEventFile().getEvents().size() > 0)) {
+			for(Event evnt: matchAllData.getEventFile().getEvents()) {
+				if(evnt.getEventInningNumber() == inning) {
+					if(evnt.getEventExtra() != null) {
+						if(evnt.getEventExtra().equalsIgnoreCase("TAPE")) {
+							bowlerId = evnt.getEventBowlerNo();
+							bowler_found = true;
+						}
+					}
+					if(bowler_found && evnt.getEventBowlerNo() == bowlerId) {
+						switch(evnt.getEventType()) {
+						case CricketUtil.ONE : case CricketUtil.TWO: case CricketUtil.THREE:  case CricketUtil.FIVE : case CricketUtil.DOT:
+		            	case CricketUtil.FOUR: case CricketUtil.SIX: case CricketUtil.NINE:
+		            		runs += evnt.getEventRuns();
+		                    break;
+		            	case CricketUtil.WIDE: case CricketUtil.NO_BALL: case CricketUtil.BYE: case CricketUtil.LEG_BYE: case CricketUtil.PENALTY:
+		            		runs += evnt.getEventRuns();
+		                    break;
+
+		            	case CricketUtil.LOG_WICKET:
+		                    if (evnt.getEventRuns() > 0)
+		                    {
+		                    	runs += evnt.getEventRuns();
+		                    }
+		                    wicket += 1;
+		                    break;
+
+		            	case CricketUtil.LOG_ANY_BALL:
+		            		runs += evnt.getEventRuns();
+		                    if (evnt.getEventExtra() != null)
+		                    {
+		                    	runs += evnt.getEventExtraRuns();
+		                    }
+		                    if (evnt.getEventSubExtra() != null)
+		                    {
+		                    	runs += evnt.getEventSubExtraRuns();
+		                    }
+		                    break;										
+						}
+					}else if(evnt.getEventBowlerNo() != bowlerId && evnt.getEventBowlerNo() != 0) {
+						bowler_found = false;
+					}
+				}
+			}
+		}
+		
+		for (BowlingCard boc : matchAllData.getMatch().getInning().get(inning - 1).getBowlingCard()) {
+			if(boc.getPlayerId() == bowlerId) {
+				name = boc.getPlayer().getTicker_name();
+			}
+		}
+		
+		return name + "," + runs + "," + wicket;
+		
+	}
+	
 }
