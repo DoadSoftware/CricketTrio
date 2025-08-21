@@ -81,6 +81,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			addItemsToList('POPULATE_FF_CURRENT_MATCH_SUMMARY',null);
 			break;
+		case 70://F - Fixture
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('FIXTURE_GRAPHIC_OPTIONS');
+			break;	
 		}
 		
 		break;
@@ -140,6 +146,9 @@ function processUserSelection(whichInput)
 	case "Line_Up":
 		processCricketProcedures('POPULATE_GRAPHICS_LINEUP');
 		break;
+	case 'FF_FIXTURE':
+		processCricketProcedures('POPULATE_GRAPHICS_FIXTURE');
+		break;
 	case 'load_scene_btn':
 		/*if(checkEmpty($('#vizIPAddress'),'IP Address Blank') == false
 			|| checkEmpty($('#vizPortNumber'),'Port Number Blank') == false) {
@@ -174,7 +183,10 @@ function processCricketProcedures(whatToProcess)
 	break;
 	case "POPULATE_GRAPHICS_LINEUP":
 		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
-	break;
+		break;
+	case 'POPULATE_GRAPHICS_FIXTURE':
+		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
+		break;
 	}
 
 	$.ajax({    
@@ -208,6 +220,9 @@ function processCricketProcedures(whatToProcess)
 			case "ISPL_LINEUP_GRAPHIC_OPTIONS":
 				addItemsToList('ISPL_LINEUP_OPTIONS',data);
 				break;
+			case "FIXTURE_GRAPHIC_OPTIONS":
+				addItemsToList('FIXTURE_OPTIONS',data);
+				break;
 			case "ISPL_PREVIOUS_MATCH_SUMMARY_GRAPHIC_OPTIONS":
 				addItemsToList('ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS',data);
 				break;
@@ -225,7 +240,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 	
 	switch(whatToProcess){
 		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
-		case "ISPL_LINEUP_OPTIONS":case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":case 'POPULATE_FF_CURRENT_MATCH_SUMMARY':
+		case "ISPL_LINEUP_OPTIONS":case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":case 'POPULATE_FF_CURRENT_MATCH_SUMMARY': case 'FIXTURE_OPTIONS':
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -291,7 +306,54 @@ function addItemsToList(whatToProcess, dataToProcess)
 						    row.insertCell(2).appendChild(div);
 						    
 							document.getElementById('select_graphic_options_div').style.display = '';
-						break;
+							break;
+						case 'FIXTURE_OPTIONS':
+							select = document.createElement('select');
+							select.id = 'selectTeam';
+							select.name = select.id;
+							dataToProcess.forEach(function(tm){	
+							option = document.createElement('option');
+				            option.value = tm.teamId;
+				            option.text = tm.teamName1;
+				            select.appendChild(option);
+				            console.log(tm.teamName1);
+					        });
+						    row.insertCell(0).appendChild(select);
+
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(1).appendChild(header_text).appendChild(select);
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'FF_FIXTURE';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(2).appendChild(div);
+						    
+							document.getElementById('select_graphic_options_div').style.display = '';
+							break;
 						case "ISPL_LINEUP_OPTIONS":
 							select = document.createElement('select');
 						    select.style.width = '250px';

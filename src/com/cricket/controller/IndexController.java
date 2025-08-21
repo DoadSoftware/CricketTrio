@@ -190,6 +190,8 @@ public class IndexController
 					: session_match.getSetup().getAwaySquad()).toString();
 		case "ISPL_LINEUP_GRAPHIC_OPTIONS":
 			return JSONObject.fromObject(session_match.getSetup()).toString();
+		case "FIXTURE_GRAPHIC_OPTIONS":
+			return JSONObject.fromObject(cricketService.getTeams()).toString();
 		case "ISPL_PREVIOUS_MATCH_SUMMARY_GRAPHIC_OPTIONS":
 			return JSONArray.fromObject(CricketFunctions.processAllFixtures(cricketService)).toString();
 		default:
