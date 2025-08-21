@@ -185,7 +185,7 @@ function processCricketProcedures(whatToProcess)
 		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
 		break;
 	case 'POPULATE_GRAPHICS_FIXTURE':
-		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
+		valueToProcess = $('#selectTeam').val() + ',' +$('#savePointsTable').val();
 		break;
 	}
 

@@ -112,6 +112,7 @@ public class DOAD_TRIO extends Scene{
 			break;
 		case"POPULATE_GRAPHICS_FIXTURE":
 			DoadWriteToTrio(print_writer, "read_template FF_ROW_COL");
+			System.out.println("valueToProcess = " + valueToProcess);
 			populateFixture(print_writer, match, cricketService, Integer.valueOf(valueToProcess.split(",")[0]));
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[1]);
 			break;	
@@ -444,6 +445,7 @@ public class DOAD_TRIO extends Scene{
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update   009-NUMBER-OF-ROWS " + FixturesList.size());
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  010-NUMBER-OF-COLUMNS " + "2");
  		
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-SUB-HEADER " + match.getSetup().getTournament());
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-SUB-HEADER02 " + team.getTeamName1());
  		
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-STAT-HEAD-NAME " + "OPPONENT");
@@ -455,39 +457,36 @@ public class DOAD_TRIO extends Scene{
 		for(int i=0;i<= FixturesList.size()-1;i++) {
 			rowId++;
 			
-//			CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide + 
-//					"$TeamSchedule$TopScorerPlayerGrps*FUNCTION*Omo*vis_con SET " + rowId + "\0", print_writers);
-//			
-//			CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId 
-//					+ "$txt_01*GEOM*TEXT SET " + (team.getTeamId() == FixturesList.get(i).getHometeamid() ? FixturesList.get(i).getAway_Team().getTeamName1() 
-//							: FixturesList.get(i).getHome_Team().getTeamName1()) + "\0", print_writers);
-//			CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId 
-//					+ "$txt_02*GEOM*TEXT SET " + "vs" + "\0", print_writers);
-//			
-//			if(FixturesList.get(i).getMargin() != null && !FixturesList.get(i).getMargin().isEmpty()) {
-//				if(FixturesList.get(i).getWinnerteam() != null && !FixturesList.get(i).getWinnerteam().isEmpty()) {
-//					if(FixturesList.get(i).getWinnerteam().equalsIgnoreCase(team.getTeamName1())) {
-//						CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId +
-//								"$txt_03*GEOM*TEXT SET " + "WON BY " + FixturesList.get(i).getMargin() + "\0", print_writers);
-//					}else {
-//						CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId +
-//								"$txt_03*GEOM*TEXT SET " + "LOST BY " + FixturesList.get(i).getMargin() + "\0", print_writers);
-//					}
-//				}else {
-//					CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId +
-//							"$txt_03*GEOM*TEXT SET " + FixturesList.get(i).getMargin() + "\0", print_writers);
-//				}
-//			}else {
-//				
-//				if(FixturesList.get(i).getDate().equalsIgnoreCase(new SimpleDateFormat("dd-MM-yyyy").format(cal_npl.getTime()))) {
-//					CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId +
-//							"$txt_03*GEOM*TEXT SET " + "TODAY" + "\0", print_writers);
-//				}else {
-//					CricketFunctions.DoadWriteCommandToAllViz("-1 RENDERER*BACK_LAYER*TREE*$AllGraphics$Side" + WhichSide +"$TeamSchedule$Row" + rowId +
-//							"$txt_03*GEOM*TEXT SET " + CricketFunctions.ordinal(Integer.valueOf(FixturesList.get(i).getDate().split("-")[0]))
-//							+ " " + Month.of(Integer.valueOf(FixturesList.get(i).getDate().split("-")[1])) + "\0", print_writers);
-//				}
-//			}
+			DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-HEAD " + i + " " + (team.getTeamId() == FixturesList.get(i).getHometeamid() ? FixturesList.get(i).getAway_Team().getTeamName1() 
+					: FixturesList.get(i).getHome_Team().getTeamName1()));
+			
+			DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE SELECT-HIGHLIGHT " + i + " 0");
+			
+			if(FixturesList.get(i).getMargin() != null && !FixturesList.get(i).getMargin().isEmpty()) {
+				if(FixturesList.get(i).getWinnerteam() != null && !FixturesList.get(i).getWinnerteam().isEmpty()) {
+					if(FixturesList.get(i).getWinnerteam().equalsIgnoreCase(team.getTeamName1())) {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+								" WON BY " + FixturesList.get(i).getMargin());
+					}else {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+								" LOST BY " + FixturesList.get(i).getMargin());
+					}
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + " " +
+							FixturesList.get(i).getMargin());
+				}
+			}else {
+				
+				if(FixturesList.get(i).getDate().equalsIgnoreCase(new SimpleDateFormat("dd-MM-yyyy").format(cal_npl.getTime()))) {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+							" TODAY");
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE SELECT-HIGHLIGHT " + i + " 1");
+				}else {
+					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + " " +
+							CricketFunctions.ordinal(Integer.valueOf(FixturesList.get(i).getDate().split("-")[0]))
+					+ " " + Month.of(Integer.valueOf(FixturesList.get(i).getDate().split("-")[1])));
+				}
+			}
 		}
 		
 		return null;
