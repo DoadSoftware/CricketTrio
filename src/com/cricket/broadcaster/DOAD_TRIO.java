@@ -111,7 +111,7 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;
 		case"POPULATE_GRAPHICS_FIXTURE":
-			DoadWriteToTrio(print_writer, "read_template FF_ROW_COL");
+			DoadWriteToTrio(print_writer, "read_template FF_Team_Schedule");
 			System.out.println("valueToProcess = " + valueToProcess);
 			populateFixture(print_writer, match, cricketService, Integer.valueOf(valueToProcess.split(",")[0]));
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[1]);
@@ -419,8 +419,6 @@ public class DOAD_TRIO extends Scene{
 
  	private String populateFixture(PrintWriter print_writer,MatchAllData match, CricketService cricketService, int teamId) {
  		
- 		int rowId = 0;
- 		
  		FixturesList.clear();
 		for(Fixture fixture : CricketFunctions.processAllFixtures(cricketService)) {
 			if(fixture.getHometeamid() == Integer.valueOf(teamId) || 
@@ -439,50 +437,53 @@ public class DOAD_TRIO extends Scene{
 		}
 		
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-HEADER1 " + "");
- 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-HEADER2 " + "FIXTURE AND RESULT");
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-HEADER2 " + "FIXTURES & RESULTS");
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  001-SELECT-HEADER-STYLE " + "0");
  		
- 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update   009-NUMBER-OF-ROWS " + FixturesList.size());
- 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  010-NUMBER-OF-COLUMNS " + "2");
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-LEFTLOGO " + "IMAGE*Default/Essentials/Logos/TLogo");
+ 		
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-TEAM-LOGO " + "IMAGE*Default/Essentials/Logos_BW/" + team.getTeamBadge() + "");
+ 		
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update   004-NumberOfMathes " + (FixturesList.size()-1));
  		
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-SUB-HEADER " + match.getSetup().getTournament());
  		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-SUB-HEADER02 " + team.getTeamName1());
  		
- 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-STAT-HEAD-NAME " + "OPPONENT");
- 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-STAT-VALUE-NAME-1 " + "RESULTS/DATES");
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 002-STAT-HEAD-NAME " + "");
+ 		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 003-STAT-VALUE-NAME-1 " + "DATE/RESULTS");
  		
  		Calendar cal_npl = Calendar.getInstance();
 		cal_npl.add(Calendar.DATE, 0);
 		
 		for(int i=0;i<= FixturesList.size()-1;i++) {
-			rowId++;
-			
-			DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-HEAD " + i + " " + (team.getTeamId() == FixturesList.get(i).getHometeamid() ? FixturesList.get(i).getAway_Team().getTeamName1() 
+			 
+			DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 001-MATCH " + i + " " + FixturesList.get(i).getMatchfilename());
+			 
+			DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 002-TeamName " + i + " " + (team.getTeamId() == FixturesList.get(i).getHometeamid() ? FixturesList.get(i).getAway_Team().getTeamName1() 
 					: FixturesList.get(i).getHome_Team().getTeamName1()));
 			
-			DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE SELECT-HIGHLIGHT " + i + " 0");
-			
+			DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 003-VS " + i + " v");
+			 
 			if(FixturesList.get(i).getMargin() != null && !FixturesList.get(i).getMargin().isEmpty()) {
 				if(FixturesList.get(i).getWinnerteam() != null && !FixturesList.get(i).getWinnerteam().isEmpty()) {
 					if(FixturesList.get(i).getWinnerteam().equalsIgnoreCase(team.getTeamName1())) {
-						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+						DoadWriteToTrio(print_writer, "table:set_cell_value  003-LEADER-BOARD-DATA 004-RESULT " + i + 
 								" WON BY " + FixturesList.get(i).getMargin());
 					}else {
-						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+						DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 004-RESULT " + i + 
 								" LOST BY " + FixturesList.get(i).getMargin());
 					}
 				}else {
-					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + " " +
+					DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 004-RESULT " + i + " " +
 							FixturesList.get(i).getMargin());
 				}
 			}else {
 				
 				if(FixturesList.get(i).getDate().equalsIgnoreCase(new SimpleDateFormat("dd-MM-yyyy").format(cal_npl.getTime()))) {
-					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + 
+					DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 004-RESULT " + i + 
 							" TODAY");
-					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE SELECT-HIGHLIGHT " + i + " 1");
 				}else {
-					DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 008-DATA-TABLE STAT-VALUE-1 " + i + " " +
+					DoadWriteToTrio(print_writer, "table:set_cell_value 003-LEADER-BOARD-DATA 004-RESULT " + i + " " +
 							CricketFunctions.ordinal(Integer.valueOf(FixturesList.get(i).getDate().split("-")[0]))
 					+ " " + Month.of(Integer.valueOf(FixturesList.get(i).getDate().split("-")[1])));
 				}
@@ -684,7 +685,7 @@ public class DOAD_TRIO extends Scene{
 	    
 	    return parts.toArray(new String[0]);
 	}
-public String getBowlerRunsOverbyOver(int inning,List<Event> event, MatchAllData matchAllData) {
+	public String getBowlerRunsOverbyOver(int inning,List<Event> event, MatchAllData matchAllData) {
 		
 		int bowlerId = 0,runs = 0,wicket = 0;
 		String name = "";
