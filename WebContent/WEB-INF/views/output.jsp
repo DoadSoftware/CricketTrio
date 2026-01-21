@@ -16,13 +16,24 @@
   <link href="<c:url value="/webjars/font-awesome/6.0.0/css/all.css"/>" rel="stylesheet">
   <script type="text/javascript">
 	$(document).on("keydown", function(e){
-		if (e.which >= 112 && e.which <= 123) { // Suppress default behaviour of F1 to F12
-			e.preventDefault();
+		
+		var evtobj = window.event? event:e;
+		switch(e.target.tagName.toLowerCase()){
+		case "input": case "textarea":
+			break;
+		default:
+			if (e.which >= 112 && e.which <= 123) { // Suppress default behaviour of F1 to F12
+				e.preventDefault();
+			}
+			processUserSelectionData('LOGGER_FORM_KEYPRESS',e.which);
+		break;
+		
 		}
-		processUserSelectionData('LOGGER_FORM_KEYPRESS',e.which);
+		
 	});
   </script>  
 </head>
+<body onload="onPageLoadEvent('OUTPUT')">
 <body>
 <form:form name="output_form" autocomplete="off" action="POST">
 <div class="content py-5" style="background-color: #EAE8FF; color: #2E008B">
@@ -42,6 +53,7 @@
 			    <label class="col-sm-4 col-form-label text-left">IP Address: ${session_selected_ip} </label>
 			    <label class="col-sm-4 col-form-label text-left">Port Number: ${session_port} </label>
 			    <label class="col-sm-4 col-form-label text-left">Broadcaster: ${session_selected_broadcaster} </label>
+			     <label id = "selected_inning" class="col-sm-4 col-form-label text-left">Which Inning: ${which_keypress} </label>
 			  </div>
 			</div>
 	      </div>
@@ -51,6 +63,7 @@
   </div>
 </div>
 <input type="hidden" name="select_broadcaster" id="select_broadcaster" value="${session_selected_broadcaster}"/>
+<input type="hidden" id="which_keypress" name="which_keypress" value="${which_keypress}"/>
 </form:form>
 </body>
 </html>

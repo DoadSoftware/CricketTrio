@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>CricketTrio</groupId>
   <artifactId>CricketTrio</artifactId>
-  <version>1.07</version>
+  <version>1.18</version>
   <packaging>war</packaging>
   <name>CricketTrio</name>
   <properties>
@@ -22,7 +22,7 @@
     <groupId>com.cricket</groupId>
     <artifactId>CricketLibrary</artifactId>
     <scope>compile</scope>
-    <version>1.515</version>
+    <version>1.561</version>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
