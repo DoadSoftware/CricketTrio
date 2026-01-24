@@ -181,12 +181,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_BALL_GRAPHIC_OPTIONS');
 			break;*/
-		/*case 67://C - TAPE BALL
+		case 66://B - COmparison
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
 			$("#expiry_message").hide();
 			processCricketProcedures('COMPARISION_GRAPHIC_OPTIONS');
-			break;*/
+			break;
 		case 88://X - Boundaries
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
@@ -223,6 +223,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_MVP_GRAPHIC_OPTIONS');
 			break;	
+		case 65://a - Projected
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			processCricketProcedures('ISPL_PROJECTED_GRAPHIC_OPTIONS');
+			break;		
 		case 116://F5 - TARGET
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
@@ -309,7 +315,6 @@ function processUserSelection(whichInput)
 		break;
 		
 	case 'cancel_graphics_btn':
-		document.getElementById("stats-container").innerHTML = "";
 		$('#select_graphic_options_div').empty();
 		document.getElementById('select_graphic_options_div').style.display = 'none';
 		$("#captions_div").show();
@@ -366,6 +371,9 @@ function processUserSelection(whichInput)
 	case "populate_graphics_target":
 		processCricketProcedures('POPULATE_GRAPHICS_TARGET');
 		break;	
+	case "populate_graphics_projected":
+		processCricketProcedures('POPULATE_GRAPHICS_PROJECTED');
+		break;
 	case "populate_graphics_toss":
 		processCricketProcedures('POPULATE_GRAPHICS_TOSS');
 		break;
@@ -459,7 +467,7 @@ function processCricketProcedures(whatToProcess)
 		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ','  + $('#savePointsTable').val();
 		break;
 	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":case "POPULATE_ISPL_FF_MATCH_SUMMARY": case "POPULATE_GRAPHICS_TARGET": 
-	case "POPULATE_GRAPHICS_MATCHID": case "POPULATE_GRAPHICS_MVP": case "POPULATE_GRAPHICS_TOSS": case "POPULATE_GRAPHICS_EQUATION":
+	case "POPULATE_GRAPHICS_MATCHID": case "POPULATE_GRAPHICS_MVP": case "POPULATE_GRAPHICS_TOSS": case "POPULATE_GRAPHICS_EQUATION": case "POPULATE_GRAPHICS_PROJECTED":
 			valueToProcess = $('#savePointsTable').val() + ',' + $('#selectgraphictype').val();
 		break;
 	case "POPULATE_GRAPHICS_BOUNDARIES":
@@ -511,6 +519,9 @@ function processCricketProcedures(whatToProcess)
 				break;
 			case'TARGET_GRAPHIC_OPTIONS':
 				addItemsToList('ISPL_TARGET_OPTIONS',data);
+				break;
+			case'ISPL_PROJECTED_GRAPHIC_OPTIONS':
+				addItemsToList('ISPL_POJECTED_OPTIONS',data);
 				break;
 			case'ISPL_MVP_GRAPHIC_OPTIONS':
 				addItemsToList('ISPL_MVP_OPTIONS',data);
@@ -1335,7 +1346,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			break;
 		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
 		case "ISPL_LINEUP_OPTIONS":case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":case 'POPULATE_FF_CURRENT_MATCH_SUMMARY': case 'FIXTURE_OPTIONS': 
-		case "ISPL_TARGET_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS": case "MATCHID_OPTIONS":
+		case "ISPL_TARGET_OPTIONS": case "ISPL_POJECTED_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS": case "MATCHID_OPTIONS":
 		case "ISPL_BOUNDARIES_OPTIONS":
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
@@ -1539,7 +1550,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 							break;
 					case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':case 'POPULATE_FF_CURRENT_MATCH_SUMMARY': 
 					case "ISPL_TARGET_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS":
-					 case "MATCHID_OPTIONS":  case "ISPL_BOUNDARIES_OPTIONS":
+					 case "MATCHID_OPTIONS":  case "ISPL_BOUNDARIES_OPTIONS": case "ISPL_POJECTED_OPTIONS":
 					 	select = document.createElement('input');
 						select.type = "text";
 						select.id = 'savePointsTable';
@@ -1601,6 +1612,10 @@ function addItemsToList(whatToProcess, dataToProcess)
 							break;
 						case "ISPL_TARGET_OPTIONS":
 							option.name = 'populate_graphics_target';
+							option.value = 'populate';
+							break;
+						case "ISPL_POJECTED_OPTIONS":
+							option.name = 'populate_graphics_projected';
 							option.value = 'populate';
 							break;
 						case 'ISPL_NEXT_BAT_OPTIONS': 
