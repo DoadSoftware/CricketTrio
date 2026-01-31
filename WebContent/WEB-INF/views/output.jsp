@@ -27,10 +27,9 @@
 			}
 			processUserSelectionData('LOGGER_FORM_KEYPRESS',e.which);
 		break;
-		
 		}
-		
 	});
+	setInterval(() => {processCricketProcedures('READ-MATCH-AND-POPULATE');}, 1000);
   </script>  
 </head>
 <body onload="onPageLoadEvent('OUTPUT')">

@@ -6,13 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.io.PrintWriter;
@@ -38,13 +34,9 @@ import java.io.FileInputStream;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;  
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.cricket.broadcaster.DOAD_TRIO;
@@ -70,6 +62,7 @@ public class IndexController
 	public static String expiry_date = "2026-12-31";
 	public static String current_date = "";
 	public static String error_message = "";
+	public static long last_match_time_stamp = 0;
 	public static DOAD_TRIO this_DOAD_TRIO;
 	public static Excel this_Excel=new Excel();
 	public static MatchAllData session_match = new MatchAllData();
@@ -177,6 +170,9 @@ public class IndexController
 						selectmatch), EventFile.class));
 			}
 			
+			last_match_time_stamp = new File(CricketUtil.CRICKET_SERVER_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
+					+ selectmatch).lastModified();
+			
 			//comented for noew
 			session_match.getMatch().setMatchFileName(selectmatch);
 //			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ, 
@@ -190,8 +186,9 @@ public class IndexController
 			
 			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
 			
-			pasttornament =CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, IndexController.headToHead.getH2hPlayer(), 
+			pasttornament =CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false,headToHead.getH2hPlayer(), 
 					cricketService, session_match, null);
+		//	past_tournament_stats = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
 			model.addAttribute("session_match", session_match);
 			model.addAttribute("session_selected_broadcaster", session_selected_broadcaster);
 			model.addAttribute("session_port", vizPortNumber);
@@ -224,13 +221,24 @@ public class IndexController
 			return JSONArray.fromObject(CricketFunctions.processAllFixtures(cricketService)).toString();
 		case "POPULATE_PREVIEW_BATPROFILE": case "POPULATE_PREVIEW_BALLLPROFILE": case "POPULATE_PREVIEW_OPENERRPROFILE":
 			return JSONArray.fromObject(GetPreviewData(valueToProcess,null,session_match,whatToProcess)).toString();
-			
+		case "READ-MATCH-AND-POPULATE":
+			if(session_match == null) {
+				return JSONObject.fromObject(null).toString();
+			}
+			if(last_match_time_stamp != new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
+				+ session_match.getMatch().getMatchFileName()).lastModified()) {
+				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
+						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
+				last_match_time_stamp = new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
+						+ session_match.getMatch().getMatchFileName()).lastModified();
+			}
+			return JSONObject.fromObject(session_match).toString();
 		default:
 			switch (session_selected_broadcaster) {
 			case CricketUtil.DOAD_TRIO:
-				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
-						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
-				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, session_selected_scenes, valueToProcess);
+//				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
+//						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
+				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, session_selected_scenes, headToHead, pasttornament, valueToProcess);
 			}
 			return JSONObject.fromObject(session_match).toString();
 		}
