@@ -315,14 +315,21 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			addItemsToList('POPULATE_MOSTRUNS',null);
 			break;	
-		case 76: // l - most wickets
+		/*case 76: // l - most wickets
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
 		    $("#expiry_message").hide();
 		    addItemsToList('POPULATE_MOSTWKTS', null);
-		    break;
-	
-			
+		    break;*/
+		case 76: //caption l (Alt_r) 
+			processCricketProcedures('RE_READ_DATA');
+			break;
+		case 87: // w - most wickets
+		    $("#captions_div").hide();
+		    $("#cancel_match_setup_btn").hide();
+		    $("#expiry_message").hide();
+		    addItemsToList('POPULATE_MOSTWKTS', null);
+		    break;	
 		/*case 70://F - Fixture
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
@@ -546,9 +553,12 @@ function processCricketProcedures(whatToProcess)
         dataType : 'json',
         success : function(data) {
         	switch(whatToProcess) {
-			case 'READ-MATCH-AND-POPULATE':
+			case 'READ-MATCH-AND-POPULATE': case "RE_READ_DATA":
 				if(data){
 					match_data = data;
+				}
+				if(whatToProcess == "RE_READ_DATA"){
+					alert("Data is Loaded");
 				}
 				break;
 			case 'SAVE_GRAPHICS':
