@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,11 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,9 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-  
 import java.io.FileInputStream;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -38,10 +32,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import com.cricket.broadcaster.DOAD_TRIO;
 import com.cricket.containers.Excel;
-import com.cricket.containers.Scene;
 import com.cricket.service.CricketService;
 import com.cricket.model.*;
 import com.cricket.util.CricketFunctions;
@@ -49,7 +41,6 @@ import com.cricket.util.CricketUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -64,42 +55,37 @@ public class IndexController
 	public static String error_message = "";
 	public static long last_match_time_stamp = 0;
 	public static DOAD_TRIO this_DOAD_TRIO;
-	public static Excel this_Excel=new Excel();
+	public static Excel this_Excel = new Excel();
 	public static MatchAllData session_match = new MatchAllData();
-	public static EventFile session_event = new EventFile();
+	//public static EventFile session_event = new EventFile();
 	public static HeadToHead headToHead = new HeadToHead ();
-	List<Statistics> session_statistics = new ArrayList<Statistics>();
+	public List<Statistics> session_statistics = new ArrayList<Statistics>();
 	public static Configuration session_Configurations = new Configuration();
-	public static MatchStats matchstats ;
-	
-	
-	List<StatsType> st = new ArrayList<StatsType>();
-	List<Statistics> stacs = new ArrayList<Statistics>();
-	public Tournament tournament;
-	public Tournament tournament1;
-	public List<Tournament> this_series = new ArrayList<Tournament>();
-	List<Scene> session_selected_scenes = new ArrayList<Scene>();
-	public static String session_selected_broadcaster;
-	public static Socket session_socket;
+	public static String mainCricketDir = CricketUtil.CRICKET_DIRECTORY;
+	public List<StatsType> allStatsType = new ArrayList<StatsType>();
+	public List<Statistics> allStatistics = new ArrayList<Statistics>();
 	public static PrintWriter print_writer;
-	public static List<Tournament> pasttornament = new ArrayList<Tournament>();
-	public static Inning inning;
-	public List<Integer> PlayerId, PlayerIdIn;
-	
-	public Player player;
-	public Player player2;
-	public Statistics stat;
-	public Statistics stat2;
-	public StatsType statsType;
-	public StatsType statsType2;
-	
-	public List<BestStats> top_batsman_beststats = new ArrayList<BestStats>();
-	public List<BestStats> top_bowler_beststats = new ArrayList<BestStats>();
-	public List<BestStats> tapeBall_beststats = new ArrayList<BestStats>();
+	public static List<Tournament> pastTournament = new ArrayList<Tournament>();
 
-	
-	
-	
+	//public static MatchStats matchstats;
+	//public Tournament tournament;
+	//public Tournament tournament1;
+	//public List<Tournament> this_series = new ArrayList<Tournament>();
+	//public List<Scene> session_selected_scenes = new ArrayList<Scene>();
+	//public static String session_selected_broadcaster;
+	//public static Socket session_socket;
+	//public static Inning inning;
+	//public List<Integer> PlayerId, PlayerIdIn;
+//	public Player player;
+//	public Player player2;
+//	public Statistics stat;
+//	public Statistics stat2;
+//	public StatsType statsType;
+//	public StatsType statsType2;
+//	public List<BestStats> top_batsman_beststats = new ArrayList<BestStats>();
+//	public List<BestStats> top_bowler_beststats = new ArrayList<BestStats>();
+//	public List<BestStats> tapeBall_beststats = new ArrayList<BestStats>();
+
 	@RequestMapping(value = {"/","/initialise"}, method={RequestMethod.GET,RequestMethod.POST}) 
 	public String initialisePage(ModelMap model) throws JAXBException, IOException 
 	{
@@ -107,7 +93,7 @@ public class IndexController
 			current_date = CricketFunctions.getOnlineCurrentDate();
 		}
 		
-		model.addAttribute("match_files", new File(CricketUtil.CRICKET_SERVER_DIRECTORY + CricketUtil.MATCHES_DIRECTORY).listFiles(new FileFilter() {
+		model.addAttribute("match_files", new File(mainCricketDir + CricketUtil.MATCHES_DIRECTORY).listFiles(new FileFilter() {
 			@Override
 		    public boolean accept(File pathname) {
 		        String name = pathname.getName().toLowerCase();
@@ -115,13 +101,13 @@ public class IndexController
 		    }
 		}));
 		
-		if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML).exists()) {
+		if(new File(mainCricketDir + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML).exists()) {
 			session_Configurations = (Configuration)JAXBContext.newInstance(Configuration.class).createUnmarshaller().unmarshal(
-					new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
+					new File(mainCricketDir + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
 		} else {
 			session_Configurations = new Configuration();
 			JAXBContext.newInstance(Configuration.class).createMarshaller().marshal(session_Configurations, 
-					new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + 
+					new File(mainCricketDir + CricketUtil.CONFIGURATIONS_DIRECTORY + 
 							CricketUtil.TRIO_XML));
 		}
 		
@@ -131,10 +117,12 @@ public class IndexController
 	
 	}
 
+	@SuppressWarnings("resource")
 	@RequestMapping(value = {"/output"}, method={RequestMethod.GET,RequestMethod.POST}) 
 	public String outputPage(ModelMap model,
 			@RequestParam(value = "select_broadcaster", required = false, defaultValue = "") String selectedBroadcaster,
 			@RequestParam(value = "selectedMatch", required = false, defaultValue = "") String selectmatch,
+			@RequestParam(value = "selectedCricketDirectory", required = false, defaultValue = "") String selectedCricketDirectory,
 			@RequestParam(value = "vizIPAddress", required = false, defaultValue = "") String vizIPAddress,
 			@RequestParam(value = "vizPortNumber", required = false, defaultValue = "") String vizPortNumber) 
 					throws UnknownHostException, IOException, JAXBException, IllegalAccessException, InvocationTargetException, ParseException, URISyntaxException, InvalidFormatException 
@@ -150,56 +138,65 @@ public class IndexController
 			return "error";
 			
 		}else {
-			this_DOAD_TRIO = new DOAD_TRIO();
 			
 			session_Configurations.setBroadcaster(selectedBroadcaster);
 			session_Configurations.setPrimaryIpAddress(vizIPAddress);
+			session_Configurations.setCricketDirectory(selectedCricketDirectory);
+
+			mainCricketDir = CricketUtil.CRICKET_DIRECTORY;
+			if(session_Configurations.getCricketDirectory().equalsIgnoreCase(CricketUtil.SECONDARY)) {
+				mainCricketDir = CricketUtil.CRICKET2_DIRECTORY;
+			}
+
+			this_DOAD_TRIO = new DOAD_TRIO(mainCricketDir);
 			
 			if(!vizIPAddress.trim().isEmpty()) {
 				session_Configurations.setPrimaryPortNumber(Integer.valueOf(vizPortNumber));
-				session_socket = new Socket(vizIPAddress, Integer.valueOf(vizPortNumber));
-				print_writer = new PrintWriter(session_socket.getOutputStream(), true);
+				Socket thisSocket = new Socket(vizIPAddress, Integer.valueOf(vizPortNumber));
+				print_writer = new PrintWriter(thisSocket.getOutputStream(), true);
 			}
 			
-			session_selected_broadcaster = selectedBroadcaster;
+			//session_selected_broadcaster = selectedBroadcaster;
 			
 			session_match = new MatchAllData();
 			
-			if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + selectmatch).exists()) {
-				session_match.setSetup(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + 
+			if(new File(mainCricketDir + CricketUtil.SETUP_DIRECTORY + selectmatch).exists()) {
+				session_match.setSetup(new ObjectMapper().readValue(new File(mainCricketDir + CricketUtil.SETUP_DIRECTORY + 
 						selectmatch), Setup.class));
-				session_match.setMatch(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY + 
+				session_match.setMatch(new ObjectMapper().readValue(new File(mainCricketDir + CricketUtil.MATCHES_DIRECTORY + 
 						selectmatch), Match.class));
 			}
-			if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + selectmatch).exists()) {
-				session_match.setEventFile(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + 
+			if(new File(mainCricketDir + CricketUtil.EVENT_DIRECTORY + selectmatch).exists()) {
+				session_match.setEventFile(new ObjectMapper().readValue(new File(mainCricketDir + CricketUtil.EVENT_DIRECTORY + 
 						selectmatch), EventFile.class));
 			}
 			
-			last_match_time_stamp = new File(CricketUtil.CRICKET_SERVER_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
-					+ selectmatch).lastModified();
+			last_match_time_stamp = new File(mainCricketDir + CricketUtil.MATCHES_DIRECTORY + selectmatch).lastModified();
 			
 			//comented for noew
 			session_match.getMatch().setMatchFileName(selectmatch);
-//			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ, 
-//					CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match));			
+			
+			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
+				CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
+			
 			session_match.getSetup().setMatchFileTimeStamp(new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
 			
 			JAXBContext.newInstance(Configuration.class).createMarshaller().marshal(session_Configurations, 
-					new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
+					new File(mainCricketDir + CricketUtil.CONFIGURATIONS_DIRECTORY + CricketUtil.TRIO_XML));
 			
-			getDataFromExcelFile();
-			st = cricketService.getAllStatsType();
-			stacs = cricketService.getAllStats();
+			getDataFromExcelFile(mainCricketDir);
+			allStatsType = cricketService.getAllStatsType();
+			allStatistics = cricketService.getAllStats();
 			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
 			
-			pasttornament =CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false,headToHead.getH2hPlayer(), 
+			pastTournament = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false,headToHead.getH2hPlayer(), 
 					cricketService, session_match, null);
 		//	past_tournament_stats = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
 			model.addAttribute("session_match", session_match);
-			model.addAttribute("session_selected_broadcaster", session_selected_broadcaster);
+			model.addAttribute("session_selected_broadcaster", selectedBroadcaster);
 			model.addAttribute("session_port", vizPortNumber);
 			model.addAttribute("session_selected_ip", vizIPAddress);
+			model.addAttribute("mainCricketDir", mainCricketDir);
 			
 			return "output";
 		}
@@ -214,17 +211,16 @@ public class IndexController
 		//System.out.println("session_selected_broadcaster = " + session_selected_broadcaster);
 		switch (whatToProcess.toUpperCase()) {
 		case "GRAPHIC_OPTIONS":
-			Map<String,String> map =getDataFromExcelFile();
+			Map<String,String> map = getDataFromExcelFile(mainCricketDir);
 			return JSONArray.fromObject(map.keySet()).toString();
 		case "RE_READ_DATA":
-			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
-			pasttornament = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
-			
-			matchstats = CricketFunctions.getAllEvents(session_match ,session_selected_broadcaster, session_match.getEventFile().getEvents());
 			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
-					CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
-			st = cricketService.getAllStatsType();
-			stacs = cricketService.getAllStats();
+				CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
+			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
+			pastTournament = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
+			//matchstats = CricketFunctions.getAllEvents(session_match ,session_selected_broadcaster, session_match.getEventFile().getEvents());
+			allStatsType = cricketService.getAllStatsType();
+			allStatistics = cricketService.getAllStats();
 			return JSONObject.fromObject(session_match).toString();
 		case "POPULATE_PREVIEW_BATPROFILE": case "POPULATE_PREVIEW_BALLLPROFILE": case "POPULATE_PREVIEW_OPENERRPROFILE":
 			return JSONArray.fromObject(GetPreviewData(valueToProcess,null,session_match,whatToProcess)).toString();
@@ -232,87 +228,88 @@ public class IndexController
 			if(session_match == null) {
 				return JSONObject.fromObject(null).toString();
 			}
-			if(last_match_time_stamp != new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
+			if(last_match_time_stamp != new File(mainCricketDir + CricketUtil.MATCHES_DIRECTORY 
 				+ session_match.getMatch().getMatchFileName()).lastModified()) {
 				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
-						 CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
-				last_match_time_stamp = new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY 
+					 CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
+				last_match_time_stamp = new File(mainCricketDir + CricketUtil.MATCHES_DIRECTORY 
 						+ session_match.getMatch().getMatchFileName()).lastModified();
 			}
 			return JSONObject.fromObject(session_match).toString();
 		default:
-			switch (session_selected_broadcaster) {
+			switch (session_Configurations.getBroadcaster()) {
 			case CricketUtil.DOAD_TRIO:
 //				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
-//						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,true));
-				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, session_selected_scenes, headToHead, pasttornament, valueToProcess);
+//						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
+				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, headToHead, pastTournament, valueToProcess);
 			}
 			return JSONObject.fromObject(session_match).toString();
 		}
-	}
+	 }
 	
-	 public static Map <String, String>  getDataFromExcelFile() {
-	        File file = new File("C:\\Sports\\Cricket\\Trio\\StatisticsFullFrame.xls");
-	        
-	        Map<String, String> dataMap = new LinkedHashMap<>();
-	        
-	        
-	        try (FileInputStream inputStream = new FileInputStream(file);
-	             Workbook workbook = new XSSFWorkbook(inputStream)) {
+	 public static Map <String, String> getDataFromExcelFile(String cricketTrioDirectory) 
+	 {
+        Map<String, String> dataMap = new LinkedHashMap<>();
+        
+        File file = new File(cricketTrioDirectory + "StatisticsFullFrame.xls");
 
-	            Sheet sheet = workbook.getSheetAt(0);
-	            int totalRows = sheet.getPhysicalNumberOfRows();
-	            StringBuilder tableData = new StringBuilder();
-	            String key = null;
+        if(file.exists()) {
+            try (FileInputStream inputStream = new FileInputStream(file);
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-	            for (int rowIndex = 0; rowIndex < totalRows; rowIndex++) {
-	                Row row = sheet.getRow(rowIndex);
-	                if (row != null && !isRowEmpty(row)) {
-	                    String cellValue = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
-	                    if (cellValue.matches("^\\d+\\.\\s.*")) {
-	                        if (key != null && tableData.length() > 0) {
-	                            dataMap.put(key, tableData.toString());
-	                            tableData.setLength(0);
-	                        }
-	                        key = cellValue;
-	                    }
-	                    for (int j = 0; j < row.getLastCellNum(); j++) {
-	                        tableData.append(row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString()).append("\t");
-	                    }
-	                    tableData.append("\n");
-	                }
-	            }
+               Sheet sheet = workbook.getSheetAt(0);
+               int totalRows = sheet.getPhysicalNumberOfRows();
+               StringBuilder tableData = new StringBuilder();
+               String key = null;
 
-	            if (key != null && tableData.length() > 0) {
-	                dataMap.put(key, tableData.toString());
-	            }
+               for (int rowIndex = 0; rowIndex < totalRows; rowIndex++) {
+                   Row row = sheet.getRow(rowIndex);
+                   if (row != null && !isRowEmpty(row)) {
+                       String cellValue = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
+                       if (cellValue.matches("^\\d+\\.\\s.*")) {
+                           if (key != null && tableData.length() > 0) {
+                               dataMap.put(key, tableData.toString());
+                               tableData.setLength(0);
+                           }
+                           key = cellValue;
+                       }
+                       for (int j = 0; j < row.getLastCellNum(); j++) {
+                           tableData.append(row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString()).append("\t");
+                       }
+                       tableData.append("\n");
+                   }
+               }
 
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-			return dataMap;
-	    }
+               if (key != null && tableData.length() > 0) {
+                   dataMap.put(key, tableData.toString());
+               }
+
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+        }
+		return dataMap;
+    }
 	
-	    private static boolean isRowEmpty(Row row) {
-	        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
-	            Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-	            if (cell != null && cell.getCellType() != CellType.BLANK) {
-	                return false;
-	            }
-	        }
-	        return true;
-	    }
-	    @SuppressWarnings("unchecked")
+    private static boolean isRowEmpty(Row row) {
+        for (int i = row.getFirstCellNum(); i < row.getLastCellNum(); i++) {
+            Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return false;
+            }
+        }
+        return true;
+    }
+	    
+		@SuppressWarnings({ "unchecked", "unused" })
 		public <T> List<T> GetPreviewData(String whatToProcess,Configuration session_configuration, MatchAllData matchAllData,String valuetoproces) throws JsonMappingException, 
 			JsonProcessingException, InterruptedException {
 	    	
 			List<String> statsData = new ArrayList<String>();
 			List<String> statsData2 = new ArrayList<String>();
-			stat = new Statistics();
-			statsType = new StatsType();
-			int k =0;
-			String best = "-";
-			String best1 = "-";
+			Statistics stat = new Statistics(), stat2 = new Statistics();
+			StatsType statsType = new StatsType();
+			Player player = new Player(), player2 = new Player();
 			
 			switch ((valuetoproces.contains(",") ? valuetoproces.split(",")[0] : valuetoproces)) {
 			case "POPULATE_PREVIEW_BATPROFILE": case "POPULATE_PREVIEW_BALLLPROFILE":
@@ -326,13 +323,14 @@ public class IndexController
 				}
 				
 				if(whatToProcess.split(",")[1].equalsIgnoreCase("ISPL S1") || whatToProcess.split(",")[1].equalsIgnoreCase("ISPL S2")) {
-					statsType = st.stream().filter(st -> st.getStats_short_name().equalsIgnoreCase(whatToProcess.split(",")[1])).findAny().orElse(null);
+					statsType = allStatsType.stream().filter(st -> st.getStats_short_name().equalsIgnoreCase(whatToProcess.split(",")[1])).findAny().orElse(null);
 					if(statsType == null) {
 						statsData.add("InfoBarPlayerProfile: Stats Type not found for profile [" + whatToProcess.split(",")[1] + "]");
 						return (List<T>) statsData;
 					}
-					
-					stat =stacs.stream().filter(st -> st.getPlayer_id() == player.getPlayerId() && statsType.getStats_id() == st.getStats_type_id()).findAny().orElse(null);
+					final int thisPlyrId = player.getPlayerId();
+					final int thisStatsTypeId = statsType.getStats_id();
+					stat = allStatistics.stream().filter(st -> st.getPlayer_id() == thisPlyrId && st.getStats_type_id() == thisStatsTypeId).findAny().orElse(null);
 					if(stat == null) {
 						statsData.add("InfoBarPlayerProfile: Stats not found for Player Id [" + whatToProcess.split(",")[0] + "]");
 						return (List<T>) statsData;
@@ -510,18 +508,21 @@ public class IndexController
 				}
 				
 				if(whatToProcess.split(",")[2].equalsIgnoreCase("ISPL S1") || whatToProcess.split(",")[2].equalsIgnoreCase("ISPL S2")) {
-					statsType = st.stream().filter(st -> st.getStats_short_name().equalsIgnoreCase(whatToProcess.split(",")[2])).findAny().orElse(null);
+					statsType = allStatsType.stream().filter(st -> st.getStats_short_name().equalsIgnoreCase(whatToProcess.split(",")[2])).findAny().orElse(null);
 					if(statsType == null) {
 						statsData.add("PlayerProfile: Stats Type not found for profile [" + whatToProcess.split(",")[2] + "]");
 					}
-					
-					stat = stacs.stream().filter(st -> st.getPlayer_id() == player.getPlayerId() && statsType.getStats_id() == st.getStats_type_id()).findAny().orElse(null);
+					final int thisPlyrId = player.getPlayerId();
+					final int thisStatsTypeId = statsType.getStats_id();
+					stat = allStatistics.stream().filter(st -> st.getPlayer_id() == thisPlyrId && thisStatsTypeId == st.getStats_type_id()).findAny().orElse(null);
 					if(stat == null) {
 						statsData.add("PlayerProfile: Stats not found for Player Id [" + whatToProcess.split(",")[0] + "]");
 					}
 					stat.setStats_type(statsType);
 					
-					stat2 = stacs.stream().filter(st -> st.getPlayer_id() == player2.getPlayerId() && statsType.getStats_id() == st.getStats_type_id()).findAny().orElse(null);
+					final int thisPlyr2Id = player2.getPlayerId();
+					final int thisStatsType2Id = statsType.getStats_id();
+					stat2 = allStatistics.stream().filter(st -> st.getPlayer_id() == thisPlyr2Id && thisStatsType2Id == st.getStats_type_id()).findAny().orElse(null);
 					if(stat2 == null) {
 						statsData2.add("PlayerProfile: Stats not found for Player Id [" + whatToProcess.split(",")[1] + "]");
 						statsData.addAll(statsData2);
@@ -628,10 +629,6 @@ public class IndexController
 //						break;
 //					}
 //				}
-				
-				
-				
-				
 				if(whatToProcess.split(",")[2].equalsIgnoreCase("ISPL S2")) {
 					statsData.add(player.getFull_name() + " - " + "ISPL SEASON 2");
 					statsData2.add(player2.getFull_name() + " - " + "ISPL SEASON 2");
@@ -642,14 +639,6 @@ public class IndexController
 					statsData.add(""+ " - " + " NO PREVIEW ONLY SEASON 1 & 2 ");
 					statsData2.add("" + " - " + " NO PREVIEW ONLY SEASON 1 & 2 ");
 				}
-				
-				
-				
-				
-				
-				
-				
-				
 //				if(whatToProcess.split(",")[1].equalsIgnoreCase("THIS SERIES")) {
 //					statsData.add(player.getFull_name() + " - " + "ISPL SEASON 3");
 //					statsData2.add(player2.getFull_name() + " - " + "ISPL SEASON 3");

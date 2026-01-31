@@ -40,6 +40,16 @@
 			    </div>
 			  </div>
 			  <div class="form-group row row-bottom-margin ml-2" style="margin-bottom:5px;">
+			    <label for="selectedCricketDirectory" class="col-sm-4 col-form-label text-left">Select Cricket Directory </label>
+			    <div class="col-sm-6 col-md-6">
+			      <select id="selectedCricketDirectory" name="selectedCricketDirectory" 
+			      		class="browser-default custom-select custom-select-sm">
+						<option value="primary">Cricket Directory</option>
+						<option value="secondary">Cricket 2 Directory</option>
+			      </select>
+			    </div>
+			  </div>
+			  <div class="form-group row row-bottom-margin ml-2" style="margin-bottom:5px;">
 			    <label for="select_broadcaster" class="col-sm-4 col-form-label text-left">Select Broadcaster </label>
 			    <div class="col-sm-6 col-md-6">
 			      <select id="select_broadcaster" name="select_broadcaster" class="browser-default custom-select custom-select-sm"

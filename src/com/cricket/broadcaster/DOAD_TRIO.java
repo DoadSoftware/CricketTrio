@@ -1,11 +1,7 @@
 package com.cricket.broadcaster;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Month;
@@ -15,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import com.cricket.containers.Scene;
 import com.cricket.controller.IndexController;
 import com.cricket.ispl.mvp_leaderBoard;
@@ -25,7 +20,6 @@ import com.cricket.model.BowlingCard;
 import com.cricket.model.Event;
 import com.cricket.model.EventFile;
 import com.cricket.model.Fixture;
-import com.cricket.model.Ground;
 import com.cricket.model.HeadToHead;
 import com.cricket.model.Inning;
 import com.cricket.model.Match;
@@ -36,17 +30,14 @@ import com.cricket.model.Statistics;
 import com.cricket.model.StatsType;
 import com.cricket.model.Team;
 import com.cricket.model.Tournament;
-import com.cricket.model.VariousText;
 import com.cricket.service.CricketService;
 import com.cricket.util.CricketFunctions;
 import com.cricket.util.CricketUtil;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.healthmarketscience.jackcess.RowId;
 
 public class DOAD_TRIO extends Scene{
 	
+	public String mainCricketDirectory = CricketUtil.CRICKET_DIRECTORY; 
 	public char return_key = (char) 13;
 	public char line_feed = (char) 10;
 	
@@ -72,7 +63,6 @@ public class DOAD_TRIO extends Scene{
 	public Tournament tournament;
 	public Tournament tournament2;
 	
-	
 	double average = 0 ,average2 =0;
 	String Data = "",hundred = "",fifty = "",strikeRate = "", thirty = "",
 		batAverage = "",economy = "",best = "",runs = "",short_name = "", surName = "",profile ="",debut1 = "",debut2 = "" ,debut = "",debut3 ="";
@@ -83,8 +73,14 @@ public class DOAD_TRIO extends Scene{
 		super();
 	}
 	
-	public Object ProcessGraphicOption(String whatToProcess, CricketService cricketService, MatchAllData match, PrintWriter print_writer, List<Scene> scenes, HeadToHead headToHead, 
-			List<Tournament> pasttornament, String valueToProcess) throws Exception{
+	public DOAD_TRIO(String mainCricketDirectory) {
+		super();
+		this.mainCricketDirectory = mainCricketDirectory;
+	}
+
+	public Object ProcessGraphicOption(String whatToProcess, CricketService cricketService, MatchAllData match, PrintWriter print_writer, 
+		HeadToHead headToHead, List<Tournament> pasttornament, String valueToProcess) throws Exception
+	{
 		switch(whatToProcess.toUpperCase()) {
 		//Load Scene
 		case "LOAD_GRAPHICS":
@@ -109,14 +105,14 @@ public class DOAD_TRIO extends Scene{
 			MatchAllData previous_match = new MatchAllData();
 			if(whatToProcess.equalsIgnoreCase("POPULATE_GRAPHICS_ISPL_FF_MATCH_SUMMARY")) {
 				Fixture fixture = cricketService.getFixtures().stream().filter(fix -> fix.getMatchnumber() == Integer.valueOf(valueToProcess.split(",")[0])).findAny().orElse(null);
-				if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
-					previous_match.setSetup(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.SETUP_DIRECTORY + 
+				if(new File(mainCricketDirectory + CricketUtil.SETUP_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
+					previous_match.setSetup(new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.SETUP_DIRECTORY + 
 							fixture.getMatchfilename() + ".json"), Setup.class));
-					previous_match.setMatch(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MATCHES_DIRECTORY + 
+					previous_match.setMatch(new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.MATCHES_DIRECTORY + 
 							fixture.getMatchfilename() + ".json"), Match.class));
 				}
-				if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
-					previous_match.setEventFile(new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.EVENT_DIRECTORY + 
+				if(new File(mainCricketDirectory + CricketUtil.EVENT_DIRECTORY + fixture.getMatchfilename() + ".json").exists()) {
+					previous_match.setEventFile(new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.EVENT_DIRECTORY + 
 							fixture.getMatchfilename() + ".json"), EventFile.class));
 				}
 				
@@ -191,7 +187,7 @@ public class DOAD_TRIO extends Scene{
 			tournament_stats = new ArrayList<Tournament>();
 			tournament_stats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, headToHead.getH2hPlayer(), cricketService, 
 					match, pasttornament);
-			System.out.println( "pastdata" +  pasttornament.size());
+			//System.out.println( "pastdata" +  pasttornament.size());
 			Collections.sort(tournament_stats,new CricketFunctions.BatsmenMostRunComparator());
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
 				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage");
@@ -226,8 +222,8 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;
 		case "POPULATE_GRAPHICS_MVP":
-			if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MVP).exists()) {
-				mvp = (new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MVP), mvp_leaderBoard.class));
+			if(new File(mainCricketDirectory + CricketUtil.MVP).exists()) {
+				mvp = (new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
 			}
 			
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
@@ -240,8 +236,8 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;
 		case "POPULATE_GRAPHICS_MVP_LEADERBOARD":	
-			if(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MVP).exists()) {
-				mvp = (new ObjectMapper().readValue(new File(CricketUtil.CRICKET_DIRECTORY + CricketUtil.MVP), mvp_leaderBoard.class));
+			if(new File(mainCricketDirectory + CricketUtil.MVP).exists()) {
+				mvp = (new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
 			}
 			
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
@@ -260,7 +256,7 @@ public class DOAD_TRIO extends Scene{
 			break;	
 			
 		case "POPULATE_DOUBLEMATCHID":	
-			System.out.println("Valuetoprocess " + valueToProcess);
+			//System.out.println("Valuetoprocess " + valueToProcess);
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")) {
 				DoadWriteToTrio(print_writer, "read_template DoubleMatchID");
 			}else {
@@ -304,7 +300,7 @@ public class DOAD_TRIO extends Scene{
 									topbowler.add(bfig);
 								}
 							}
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							Collections.sort(topbowler,new CricketFunctions.PlayerBestStatsComparator());
 							
@@ -343,13 +339,13 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 						}
 						
 						if(valueToProcess.split(",")[1].equalsIgnoreCase("THIS SERIES")) {
-							System.out.println("CP");
+							//System.out.println("CP");
 							for(int i=0;i<=top_Batsman.size()-1;i++) {
 								if(top_Batsman.get(i).getPlayerId() == player.getPlayerId()) {
 									if(top_Batsman.get(i).getBestEquation() % 2 == 0) {
@@ -478,7 +474,7 @@ public class DOAD_TRIO extends Scene{
 									topbowler.add(bfig);
 								}
 							}
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							Collections.sort(topbowler,new CricketFunctions.PlayerBestStatsComparator());
 							
@@ -517,13 +513,13 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 						}
 						
 						if(valueToProcess.split(",")[1].equalsIgnoreCase("THIS SERIES")) {
-							System.out.println("CP");
+							//System.out.println("CP");
 							for(int i=0;i<=top_Batsman.size()-1;i++) {
 								if(top_Batsman.get(i).getPlayerId() == player.getPlayerId()) {
 									if(top_Batsman.get(i).getBestEquation() % 2 == 0) {
@@ -618,7 +614,7 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[3]);
 			break;
 		case "POPULATE_GRAPHICS_OPENERBATPROFILE":
-			System.out.println("whattoprocess" + valueToProcess);
+			//System.out.println("whattoprocess" + valueToProcess);
 			debut1 ="NO";
 			debut2 ="NO";
 			for(Player ply: cricketService.getAllPlayer()) {
@@ -646,7 +642,7 @@ public class DOAD_TRIO extends Scene{
 								}
 							}
 							
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							
 							tournament = PastDataToCrr.stream().filter(tour->tour.getPlayerId() == player.getPlayerId()).findAny().orElse(null);
@@ -696,7 +692,7 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 							
@@ -716,7 +712,7 @@ public class DOAD_TRIO extends Scene{
 							statsType2 = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat2.setStats_type(statsType2);
 							
-							System.out.println(stat2.getMatches());
+							//System.out.println(stat2.getMatches());
 							stat2 = CricketFunctions.updateTournamentWithH2h(stat2, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat2 = CricketFunctions.updateStatisticsWithMatchData(stat2, match, CricketUtil.FULL);
 						}
@@ -874,7 +870,7 @@ public class DOAD_TRIO extends Scene{
 								}
 							}
 							
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							
 							tournament = PastDataToCrr.stream().filter(tour->tour.getPlayerId() == player.getPlayerId()).findAny().orElse(null);
@@ -924,7 +920,7 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 							
@@ -944,7 +940,7 @@ public class DOAD_TRIO extends Scene{
 							statsType2 = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat2.setStats_type(statsType2);
 							
-							System.out.println(stat2.getMatches());
+							//System.out.println(stat2.getMatches());
 							stat2 = CricketFunctions.updateTournamentWithH2h(stat2, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat2 = CricketFunctions.updateStatisticsWithMatchData(stat2, match, CricketUtil.FULL);
 						}
@@ -1088,8 +1084,8 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[4]);
 			break;
 		case "POPULATE_GRAPHICS_DOUBLEBATPROFILE":
-			System.out.println("Valuetoprocess" + valueToProcess);
-			System.out.println("whattoprocess" + valueToProcess);
+			//System.out.println("Valuetoprocess" + valueToProcess);
+			//System.out.println("whattoprocess" + valueToProcess);
 			player = CricketFunctions.getPlayerFromMatchData(Integer.valueOf(valueToProcess.split(",")[0]), match);
 			player2 = CricketFunctions.getPlayerFromMatchData(Integer.valueOf(valueToProcess.split(",")[1]), match);
 			if(valueToProcess.split(",")[2].equalsIgnoreCase("ISPL_CAREER")) {
@@ -1109,7 +1105,7 @@ public class DOAD_TRIO extends Scene{
 					}
 				}
 				
-				System.out.println(PastDataToCrr.size());
+				//System.out.println(PastDataToCrr.size());
 				Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 				
 				tournament = PastDataToCrr.stream().filter(tour->tour.getPlayerId() == player.getPlayerId()).findAny().orElse(null);
@@ -1159,7 +1155,7 @@ public class DOAD_TRIO extends Scene{
 				statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 				stat.setStats_type(statsType);
 				
-				System.out.println(stat.getMatches());
+				//System.out.println(stat.getMatches());
 				stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 				stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 				
@@ -1179,7 +1175,7 @@ public class DOAD_TRIO extends Scene{
 				statsType2 = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 				stat2.setStats_type(statsType2);
 				
-				System.out.println(stat2.getMatches());
+				//System.out.println(stat2.getMatches());
 				stat2 = CricketFunctions.updateTournamentWithH2h(stat2, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 				stat2 = CricketFunctions.updateStatisticsWithMatchData(stat2, match, CricketUtil.FULL);
 			}
@@ -1334,7 +1330,7 @@ public class DOAD_TRIO extends Scene{
 							team = match.getSetup().getAwayTeam();
 						}
 					}else {
-						System.out.println("whattoprocess" + valueToProcess);
+						//System.out.println("whattoprocess" + valueToProcess);
 						if(valueToProcess.split(",")[1].equalsIgnoreCase("ISPL_CAREER")) {
 							profile = "ISPL CAREER";
 						}else if(valueToProcess.split(",")[1].equalsIgnoreCase("ISPL S1")){
@@ -1356,7 +1352,7 @@ public class DOAD_TRIO extends Scene{
 									topbowler.add(bfig);
 								}
 							}
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							Collections.sort(topbowler,new CricketFunctions.PlayerBestStatsComparator());
 							
@@ -1396,7 +1392,7 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 						}
@@ -1493,7 +1489,7 @@ public class DOAD_TRIO extends Scene{
 							team = match.getSetup().getAwayTeam();
 						}
 					}else {
-						System.out.println("whattoprocess" + valueToProcess);
+						//System.out.println("whattoprocess" + valueToProcess);
 						if(valueToProcess.split(",")[1].equalsIgnoreCase("ISPL_CAREER")) {
 							profile = "ISPL CAREER";
 						}else if(valueToProcess.split(",")[1].equalsIgnoreCase("ISPL S1")){
@@ -1515,7 +1511,7 @@ public class DOAD_TRIO extends Scene{
 									topbowler.add(bfig);
 								}
 							}
-							System.out.println(PastDataToCrr.size());
+							//System.out.println(PastDataToCrr.size());
 							Collections.sort(top_Batsman,new CricketFunctions.PlayerBestStatsComparator());
 							Collections.sort(topbowler,new CricketFunctions.PlayerBestStatsComparator());
 							
@@ -1555,7 +1551,7 @@ public class DOAD_TRIO extends Scene{
 							statsType = cricketService.getAllStatsType().stream().filter(st -> st.getStats_short_name().equalsIgnoreCase("D10")).findAny().orElse(null);
 							stat.setStats_type(statsType);
 							
-							System.out.println(stat.getMatches());
+							//System.out.println(stat.getMatches());
 							stat = CricketFunctions.updateTournamentWithH2h(stat, headToHead.getH2hPlayer(), match, CricketUtil.FULL);
 							stat = CricketFunctions.updateStatisticsWithMatchData(stat, match, CricketUtil.FULL);
 						}
@@ -1639,7 +1635,7 @@ public class DOAD_TRIO extends Scene{
 			break;
 		case"POPULATE_GRAPHICS_FIXTURE":
 			DoadWriteToTrio(print_writer, "read_template FF_Team_Schedule");
-			System.out.println("valueToProcess = " + valueToProcess);
+			//System.out.println("valueToProcess = " + valueToProcess);
 			populateFixture(print_writer, match, cricketService, Integer.valueOf(valueToProcess.split(",")[0]));
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[1]);
 			break;	
@@ -1654,7 +1650,7 @@ public class DOAD_TRIO extends Scene{
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[1]);
 			break;
 		case "POPULATE_GRAPHICS":
-			Map<String, String> mp = IndexController.getDataFromExcelFile();
+			Map<String, String> mp = IndexController.getDataFromExcelFile(mainCricketDirectory);
 			String [] str =mp.get(valueToProcess).split("\n");
 			
 			if((str.length-5)<Integer.valueOf(str[1].split("X")[0])) {
@@ -1958,7 +1954,7 @@ public class DOAD_TRIO extends Scene{
  		String[] proj_score_rate = new String[CricketFunctions.projectedScore(match).size()];
 	    for (int i = 0; i < CricketFunctions.projectedScore(match).size(); i++) {
 	    	proj_score_rate[i] = CricketFunctions.projectedScore(match).get(i);
-	    	System.out.println(proj_score_rate[i]);
+	    	//System.out.println(proj_score_rate[i]);
         }
  		for(Inning inn : match.getMatch().getInning()) {
 			
@@ -2211,7 +2207,7 @@ public class DOAD_TRIO extends Scene{
 		 TimeUnit.MILLISECONDS.sleep(500);
 		 
 		 if(profile.equalsIgnoreCase("ISPL SEASON 3")) {
-	 	 		System.out.println("Coming inside");
+	 	 		//System.out.println("Coming inside");
 	 	 		DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 0 " +  (tournament.getMatches() != 0?String.valueOf(tournament.getMatches()):"-"));
 	 	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 1 " +  (tournament.getRuns() != 0?String.valueOf(tournament.getRuns()):"-"));
 	 	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 2 " +  CricketFunctions.generateStrikeRate(tournament.getRuns(), tournament.getBallsFaced(), 0));
@@ -2230,7 +2226,7 @@ public class DOAD_TRIO extends Scene{
 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 500-SELECT-DATA-TYPE 3");
 		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 001-HEAD "+ profile );
 		 if(profile.equalsIgnoreCase("ISPL SEASON 3")) {
-	 	 		System.out.println("Coming inside");
+	 	 		//System.out.println("Coming inside");
 	 	 		DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 0 " +  (tournament.getMatches() != 0?String.valueOf(tournament.getMatches()):"-"));
 	 	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 1 " +  (tournament.getRuns() != 0?String.valueOf(tournament.getRuns()):"-"));
 	 	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 2 " +  CricketFunctions.generateStrikeRate(tournament.getRuns(), tournament.getBallsFaced(), 0));
@@ -2293,7 +2289,7 @@ public class DOAD_TRIO extends Scene{
  	}
    private void populateDoubleProfile(PrintWriter print_writer,MatchAllData match) {
  		
- 		System.out.println("COMONH INSIDE MAIn");
+ 		//System.out.println("COMONH INSIDE MAIn");
  	 	DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 302-NAME "+  player.getTicker_name());
  	 	DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 301-IMAGE "+ "C:\\\\Images\\\\ISPL\\\\PHOTOS\\"
     			+ team.getTeamName4()+ "\\\\STRAIGHT_1024\\\\" +player.getPhoto()+ CricketUtil.PNG_EXTENSION);
@@ -2312,7 +2308,7 @@ public class DOAD_TRIO extends Scene{
  	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATHEAD 3" +  " BEST");
  	 	
  	 	if(profile.equalsIgnoreCase("ISPL SEASON 3")) {
- 	 		System.out.println("Coming inside");
+ 	 		//System.out.println("Coming inside");
  	 		DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 0 " +  (tournament.getMatches() != 0?String.valueOf(tournament.getMatches()):"-"));
  	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 1 " +  (tournament.getRuns() != 0?String.valueOf(tournament.getRuns()):"-"));
  	 	 	DoadWriteToTrio(print_writer, "table:set_cell_value 501-DATA-ALL STATVALUE1 2 " +  CricketFunctions.generateStrikeRate(tournament.getRuns(), tournament.getBallsFaced(), 0));

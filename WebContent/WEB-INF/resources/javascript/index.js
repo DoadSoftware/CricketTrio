@@ -568,13 +568,13 @@ function processCricketProcedures(whatToProcess)
 				break;
 			case 'POPULATE_PREVIEW_BATPROFILE':	
 			     addItemsToList('DISPLAYBATPREVIEW',data);
-			break;
+				break;
 			case 'POPULATE_PREVIEW_OPENERRPROFILE':	
 			     addItemsToList('DISPLAYBATPREVIEW1',data);
-			break;
+				break;
 			case 'POPULATE_PREVIEW_BALLLPROFILE':
 				addItemsToList('DISPLAYBATPREVIEW',data);
-			break;
+				break;
 			case 'GRAPHIC_OPTIONS':
 				addItemsToList('GRAPHICS',data);
 				break;
@@ -592,11 +592,11 @@ function addItemsToList(whatToProcess, dataToProcess)
 	switch(whatToProcess){
 		
 		case 'DISPLAYBATPREVIEW':
-		displayStats(dataToProcess);
-		 break;
+			displayStats(dataToProcess);
+		 	break;
 		case 'DISPLAYBATPREVIEW1':
-		displayStats1(dataToProcess);
-		 break;
+			displayStats1(dataToProcess);
+		 	break;
 		case 'ISPL_DOUBLEMATCHID_OPTIONS':
 		  $('#select_graphic_options_div').empty();
 	
