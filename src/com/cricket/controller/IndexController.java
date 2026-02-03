@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +69,48 @@ public class IndexController
 	public List<Statistics> allStatistics = new ArrayList<Statistics>();
 	public static PrintWriter print_writer;
 	public static List<Tournament> pastTournament = new ArrayList<Tournament>();
+	
+	
+	private static final Map<String, Comparator<Tournament>> SORT_MAP;
+
+	static {
+	    Map<String, Comparator<Tournament>> map = new HashMap<>();
+
+	    Comparator<Tournament> mostRuns =
+	            new CricketFunctions.BatsmenMostRunComparator();
+	    Comparator<Tournament> mostWickets =
+	            new CricketFunctions.BowlerWicketsComparator();
+	    Comparator<Tournament> fours =
+	            new CricketFunctions.BatsmanFoursComparator();
+	    Comparator<Tournament> sixes =
+	            new CricketFunctions.BatsmanSixesComparator();
+	    Comparator<Tournament> strikeRate =
+	            new CricketFunctions.BestBatsmanStrikeRateComparator();
+	    Comparator<Tournament> economy =
+	            new CricketFunctions.BestBowlerEconomyComparator();
+
+	    map.put("POPULATE_MOSTRUNS", mostRuns);
+
+	    map.put("x", mostWickets);
+	    map.put("Shift_$", mostWickets);
+	    map.put("Alt_Shift_X", mostWickets);
+
+	    map.put("c", fours);
+	    map.put("Control_Shift_@", fours);
+	    map.put("Alt_Shift_T", fours);
+
+	    map.put("v", sixes);
+	    map.put("Control_Alt_5", sixes);
+	    map.put("Alt_Shift_V", sixes);
+
+	    map.put("Control_Shift_Z", strikeRate);
+	    map.put("Control_Alt_9", strikeRate);
+
+	    map.put("Control_Shift_Y", economy);
+	    map.put("Control_Alt_0", economy);
+
+	    SORT_MAP = Collections.unmodifiableMap(map);
+	}
 
 	//public static MatchStats matchstats;
 	//public Tournament tournament;
@@ -213,6 +258,16 @@ public class IndexController
 		case "GRAPHIC_OPTIONS":
 			Map<String,String> map = getDataFromExcelFile(mainCricketDir);
 			return JSONArray.fromObject(map.keySet()).toString();
+		case "POPULATE_MOSTRUNS":
+			List<Tournament> tournamentStats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, 
+					headToHead.getH2hPlayer(), cricketService, session_match, pastTournament);
+			
+			    Comparator<Tournament> comparator = SORT_MAP.get(whatToProcess);
+			    if (comparator != null) {
+			        tournamentStats.sort(comparator);
+			    }
+			    
+			return JSONArray.fromObject(tournamentStats).toString();
 		case "RE_READ_DATA":
 			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
 				CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));

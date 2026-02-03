@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DOAD_TRIO extends Scene{
 	
 	public String mainCricketDirectory = CricketUtil.CRICKET_DIRECTORY; 
+	public String secondCricketDirectory = CricketUtil.CRICKET2_DIRECTORY;
 	public char return_key = (char) 13;
 	public char line_feed = (char) 10;
 	
@@ -210,6 +211,45 @@ public class DOAD_TRIO extends Scene{
 			}
 			populateMOSTWKTS(print_writer, match,cricketService,tournament_stats);
 			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
+			break;	
+		case "POPULATE_GRAPHICS_MOSTNINE":
+			tournament_stats = new ArrayList<Tournament>();
+			tournament_stats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, headToHead.getH2hPlayer(), cricketService, 
+					match, pasttornament);
+			Collections.sort(tournament_stats,new CricketFunctions.BatsmanNinesComparator());
+			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage");
+			}else {
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage_Drone");
+			}
+			populateMOSTNINES(print_writer, match,cricketService,tournament_stats);
+			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
+			break;	
+		case "POPULATE_GRAPHICS_MOSTFOURS":
+			tournament_stats = new ArrayList<Tournament>();
+			tournament_stats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, headToHead.getH2hPlayer(), cricketService, 
+					match, pasttornament);
+			Collections.sort(tournament_stats,new CricketFunctions.BatsmanFoursComparator());
+			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage");
+			}else {
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage_Drone");
+			}
+			populateMOSTFOURS(print_writer, match,cricketService,tournament_stats);
+			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
+			break;
+		case "POPULATE_GRAPHICS_MOSTSIXES":
+			tournament_stats = new ArrayList<Tournament>();
+			tournament_stats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, headToHead.getH2hPlayer(), cricketService, 
+					match, pasttornament);
+			Collections.sort(tournament_stats,new CricketFunctions.BatsmanSixesComparator());
+			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage");
+			}else {
+				DoadWriteToTrio(print_writer, "read_template LeaderBoard_ActionImage_Drone");
+			}
+			populateMOSTSIXES(print_writer, match,cricketService,tournament_stats);
+			DoadWriteToTrio(print_writer, "saveas " + valueToProcess.split(",")[0]);
 			break;			
 		case "POPULATE_GRAPHICS_EQUATION":
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
@@ -223,7 +263,7 @@ public class DOAD_TRIO extends Scene{
 			break;
 		case "POPULATE_GRAPHICS_MVP":
 			if(new File(mainCricketDirectory + CricketUtil.MVP).exists()) {
-				mvp = (new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
+				mvp = (new ObjectMapper().readValue(new File(secondCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
 			}
 			
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
@@ -237,7 +277,7 @@ public class DOAD_TRIO extends Scene{
 			break;
 		case "POPULATE_GRAPHICS_MVP_LEADERBOARD":	
 			if(new File(mainCricketDirectory + CricketUtil.MVP).exists()) {
-				mvp = (new ObjectMapper().readValue(new File(mainCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
+				mvp = (new ObjectMapper().readValue(new File(secondCricketDirectory + CricketUtil.MVP), mvp_leaderBoard.class));
 			}
 			
 			if(valueToProcess.split(",")[1].equalsIgnoreCase("AR")){
@@ -2087,6 +2127,7 @@ public class DOAD_TRIO extends Scene{
  	  	for (int j = 0; j < finalFivePlayers.size(); j++) {
  	  		String player_id = finalFivePlayers.get(j).getPlayerId();
  	  		rowId = rowId + 1;
+ 	  		
  	  		if(rowId <= 5) {
  	  			DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 1-SELECT_TEAM_NAME " + (rowId-1) + " " + 1);
  	  			
@@ -2102,13 +2143,159 @@ public class DOAD_TRIO extends Scene{
  	  			
  	  			DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 3-TEAM-NAME " + (rowId-1) + " " + team.getTeamName1());
  	  			
- 	  			
+ 	  			if(rowId == 1) {
+	  				DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-TeamRefName "+  team.getTeamBadge());
+	  				
+	  				DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 501-IMAGE "+ "C:\\\\Images\\\\ISPL\\\\Action_Images\\"
+ 			      			 + team.getTeamBadge().toUpperCase().substring(0, 3) + "_"+ player.getPhoto() + CricketUtil.PNG_EXTENSION);	
+	  			}
  	  		}
  	  	}
  	}
  	
  	
+ 	private void populateMOSTNINES(PrintWriter print_writer,MatchAllData match,CricketService cricketService, List<Tournament> tournament_stats) {
+ 		
+		 int rowId = 0;
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  000-MATCH-NUMBER MOST 9 STREET RUNS");
+		
+		
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 700-SELECT-STAT-HEAD 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 0 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 1 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 2 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 3 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 4 0");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 801-STAT-HEAD MTS");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 802-STAT-HEAD NINES");
+		for(int i = 0; i <= tournament_stats.size() - 1 ; i++) {
+			  rowId = rowId + 1;
+			if(rowId <= 5) {
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 4-SELECT_VALUE " + (rowId-1) + " " + 1);
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 1-SELECT_TEAM_NAME " + (rowId-1) + " " + 1);
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 5-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getMatches());
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 6-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getNines());
+				
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 2-PLAYER-NAME " + (rowId-1) + " " + tournament_stats.get(i).getPlayer().getFull_name());
+				
+				
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(i).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 3-TEAM-NAME " + (rowId-1) + " " + tm.getTeamName1());
+						
+					}
+				}
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(0).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-TeamRefName "+  tm.getTeamBadge());
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 501-IMAGE "+ "C:\\\\Images\\\\ISPL\\\\Action_Images\\"
+				      			 + tm.getTeamBadge().toUpperCase().substring(0, 3) + "_"+ tournament_stats.get(0).getPlayer().getPhoto() + CricketUtil.PNG_EXTENSION);
+						
+					}
+				}
+			}
+		}
+	}
  	
+ 	private void populateMOSTSIXES(PrintWriter print_writer,MatchAllData match,CricketService cricketService, List<Tournament> tournament_stats) {
+ 		
+		 int rowId = 0;
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  000-MATCH-NUMBER MOST SIXES");
+		
+		
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 700-SELECT-STAT-HEAD 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 0 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 1 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 2 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 3 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 4 0");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 801-STAT-HEAD MTS");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 802-STAT-HEAD SIXES");
+		for(int i = 0; i <= tournament_stats.size() - 1 ; i++) {
+			  rowId = rowId + 1;
+			if(rowId <= 5) {
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 4-SELECT_VALUE " + (rowId-1) + " " + 1);
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 1-SELECT_TEAM_NAME " + (rowId-1) + " " + 1);
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 5-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getMatches());
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 6-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getSixes());
+				
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 2-PLAYER-NAME " + (rowId-1) + " " + tournament_stats.get(i).getPlayer().getFull_name());
+				
+				
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(i).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 3-TEAM-NAME " + (rowId-1) + " " + tm.getTeamName1());
+						
+					}
+				}
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(0).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-TeamRefName "+  tm.getTeamBadge());
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 501-IMAGE "+ "C:\\\\Images\\\\ISPL\\\\Action_Images\\"
+				      			 + tm.getTeamBadge().toUpperCase().substring(0, 3) + "_"+ tournament_stats.get(0).getPlayer().getPhoto() + CricketUtil.PNG_EXTENSION);
+						
+					}
+				}
+			}
+		}
+	}
+ 	private void populateMOSTFOURS(PrintWriter print_writer,MatchAllData match,CricketService cricketService, List<Tournament> tournament_stats) {
+ 		
+		 int rowId = 0;
+		DoadWriteToTrio(print_writer, "tabfield:set_value_no_update  000-MATCH-NUMBER MOST FOURS");
+		
+		
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 700-SELECT-STAT-HEAD 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 0 1");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 1 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 2 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 3 0");
+		 DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 0-SELECT_HIGHLIGHT 4 0");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 801-STAT-HEAD MTS");
+		 DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 802-STAT-HEAD FOURS");
+		for(int i = 0; i <= tournament_stats.size() - 1 ; i++) {
+			  rowId = rowId + 1;
+			if(rowId <= 5) {
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 4-SELECT_VALUE " + (rowId-1) + " " + 1);
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 1-SELECT_TEAM_NAME " + (rowId-1) + " " + 1);
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 5-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getMatches());
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 6-STAT-VALUE " + (rowId-1) + " " + tournament_stats.get(i).getFours());
+				
+				
+				DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 2-PLAYER-NAME " + (rowId-1) + " " + tournament_stats.get(i).getPlayer().getFull_name());
+				
+				
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(i).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "table:set_cell_value 900-DATA 3-TEAM-NAME " + (rowId-1) + " " + tm.getTeamName1());
+						
+					}
+				}
+				
+				for(Team tm:cricketService.getTeams()) {
+					if(tm.getTeamId() == tournament_stats.get(0).getPlayer().getTeamId()) {
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 000-TeamRefName "+  tm.getTeamBadge());
+						DoadWriteToTrio(print_writer, "tabfield:set_value_no_update 501-IMAGE "+ "C:\\\\Images\\\\ISPL\\\\Action_Images\\"
+				      			 + tm.getTeamBadge().toUpperCase().substring(0, 3) + "_"+ tournament_stats.get(0).getPlayer().getPhoto() + CricketUtil.PNG_EXTENSION);
+						
+					}
+				}
+			}
+		}
+	}
  	
  	private void populateMOSTWKTS(PrintWriter print_writer,MatchAllData match,CricketService cricketService, List<Tournament> tournament_stats) {
  		
