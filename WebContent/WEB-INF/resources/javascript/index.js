@@ -175,12 +175,12 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			processCricketProcedures('ISPL_50_50_GRAPHIC_OPTIONS');
 			break;*/
-		/*case 88://X - TAPE BALL
+		case 71://G - TAPE BALL
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
 			$("#expiry_message").hide();
-			processCricketProcedures('ISPL_BALL_GRAPHIC_OPTIONS');
-			break;*/
+			processCricketProcedures('ISPL_TAPEBALL_GRAPHIC_OPTIONS');
+			break;
 		case 66://B - COmparison
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
@@ -309,13 +309,7 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 			$("#expiry_message").hide();
 			addItemsToList('POPULATE_FF_CURRENT_MATCH_SUMMARY',null);
 			break;
-		case 77://m - most runs
-			$("#captions_div").hide();
-			$("#cancel_match_setup_btn").hide();
-			$("#expiry_message").hide();
-			//addItemsToList('POPULATE_MOSTRUNS',null);
-			processCricketProcedures('POPULATE_MOSTRUNS');
-			break;	
+			
 		/*case 76: // l - most wickets
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
@@ -325,39 +319,67 @@ function processUserSelectionData(whatToProcess,dataToProcess){
 		case 76: //caption l (Alt_r) 
 			processCricketProcedures('RE_READ_DATA');
 			break;
+		case 77://m - most runs
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			//addItemsToList('POPULATE_MOSTRUNS',null);
+			processCricketProcedures('POPULATE_MOSTRUNS');
+			break;
 		case 87: // w - most wickets
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
 		    $("#expiry_message").hide();
-		    addItemsToList('POPULATE_MOSTWKTS', null);
+		   // addItemsToList('POPULATE_MOSTWKTS', null);
+		    processCricketProcedures('POPULATE_MOSTWKTS');
 		    break;	
 		case 81: // q - most nines
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
 		    $("#expiry_message").hide();
-		    addItemsToList('POPULATE_MOSTNINE', null);
+		  //  addItemsToList('POPULATE_MOSTNINE', null);
+		    processCricketProcedures('POPULATE_MOSTNINE');
 		    break;
 		   
 		case 84: // t - most fours
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
 		    $("#expiry_message").hide();
-		    addItemsToList('POPULATE_MOSTFOURS', null);
+		  //  addItemsToList('POPULATE_MOSTFOURS', null);
+		    processCricketProcedures('POPULATE_MOSTFOURS');
 		    break;	
 		 case 83: // s - most sixes
 		    $("#captions_div").hide();
 		    $("#cancel_match_setup_btn").hide();
 		    $("#expiry_message").hide();
-		    addItemsToList('POPULATE_MOSTSIXES', null);
+		   // addItemsToList('POPULATE_MOSTSIXES', null);
+		    processCricketProcedures('POPULATE_MOSTSIXES');
 		    break;
- 
+ 		case 89: // y - last x balls
+		    $("#captions_div").hide();
+		    $("#cancel_match_setup_btn").hide();
+		    $("#expiry_message").hide();
+		   addItemsToList('POPULATE_LASTXBALLS', null);
+		    break;
 		        	    
-		/*case 70://F - Fixture
+		case 68://d- PARTNERSHIP
 			$("#captions_div").hide();
 			$("#cancel_match_setup_btn").hide();
 			$("#expiry_message").hide();
-			processCricketProcedures('FIXTURE_GRAPHIC_OPTIONS');
-			break;	*/
+			 addItemsToList('POPULATE_PARTNERSHIP', null);
+			break;
+		case 121://F10 - Line_options
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			addItemsToList('LINEUP_GRAPHIC_OPTIONS', null);
+			break;	
+		case 122://F11 - RUNRATE
+			$("#captions_div").hide();
+			$("#cancel_match_setup_btn").hide();
+			$("#expiry_message").hide();
+			 addItemsToList('RUN_RATE-OPTION',null);
+			break;	
 		}
 		
 		break;
@@ -455,14 +477,26 @@ function processUserSelection(whichInput)
 	case "populate_graphics_matchid":
 		processCricketProcedures('POPULATE_GRAPHICS_MATCHID');
 		break;
+	case "populate_graphics_partnership":
+		processCricketProcedures('POPULATE_GRAPHICS_CURRENTPARTERNERSHIP');
+		break;
+	case "populate_graphics_lineup":
+		processCricketProcedures('POPULATE_GRAPHICS_UPLINE');
+		break;	
 	case "populate_graphics_mostruns":
 		processCricketProcedures('POPULATE_GRAPHICS_MOSTRUNS');
+		break;
+	case "populate_graphics_tapeballover":
+		processCricketProcedures('POPULATE_GRAPHICS_TAPEBALL');
 		break;
 	case "populate_graphics_mostwkt":
 		processCricketProcedures('POPULATE_GRAPHICS_MOSTWKTS');
 		break;	
 	case "populate_graphics_mostnine":
 		processCricketProcedures('POPULATE_GRAPHICS_MOSTNINE');
+		break;	
+	case 'populate_LastXBalls_VR_btn':
+		processCricketProcedures('POPULATE-LASTXBALLS_VR');
 		break;	
 	case "populate_graphics_mostfour":
 		processCricketProcedures('POPULATE_GRAPHICS_MOSTFOURS');
@@ -482,14 +516,14 @@ function processUserSelection(whichInput)
 	case "populate_mvp_leaderboard":
 		processCricketProcedures('POPULATE_GRAPHICS_MVP_LEADERBOARD');
 		break;		
+	case "populate_requiredrunrate":
+		processCricketProcedures('POPULATE_GRAPHICS_REQUIREDRUNRATE');
+		break;			
 	case "populate_boundary":
 		processCricketProcedures('POPULATE_GRAPHICS_BOUNDARIES');
 		break;	
 	case"populate_graphics_nextToBat":
 		processCricketProcedures('POPULATE_GRAPHICS_NEXT_TO_BAT');
-		break;
-	case "Line_Up":
-		processCricketProcedures('POPULATE_GRAPHICS_LINEUP');
 		break;
 	case 'FF_FIXTURE':
 		processCricketProcedures('POPULATE_GRAPHICS_FIXTURE');
@@ -560,19 +594,20 @@ function processCricketProcedures(whatToProcess)
 		valueToProcess = $('#whichScene').val() + ',' + $('#whichPlayer').val() + ','  + $('#savePointsTable').val();
 		break;
 	case"POPULATE_GRAPHICS_COMPARISION":case"POPULATE_GRAPHICS_NEXT_TO_BAT":case "POPULATE_ISPL_FF_MATCH_SUMMARY": case "POPULATE_GRAPHICS_TARGET":  case "POPULATE_GRAPHICS_MVP_LEADERBOARD":
-	case "POPULATE_GRAPHICS_MATCHID": case "POPULATE_GRAPHICS_MVP": case "POPULATE_GRAPHICS_TOSS": case "POPULATE_GRAPHICS_EQUATION": case "POPULATE_GRAPHICS_PROJECTED": 
-	case "POPULATE_GRAPHICS_MOSTWKTS": case "POPULATE_GRAPHICS_MOSTNINE": case "POPULATE_GRAPHICS_MOSTSIXES": case "POPULATE_GRAPHICS_MOSTFOURS":
-			valueToProcess = $('#savePointsTable').val() + ',' + $('#selectgraphictype').val();
+	case "POPULATE_GRAPHICS_MATCHID": case "POPULATE_GRAPHICS_MVP": case "POPULATE_GRAPHICS_TOSS": case "POPULATE_GRAPHICS_EQUATION":  case "POPULATE_GRAPHICS_REQUIREDRUNRATE":
+	case "POPULATE_GRAPHICS_PROJECTED": case "POPULATE_GRAPHICS_CURRENTPARTERNERSHIP": case "POPULATE_GRAPHICS_UPLINE":
+	 	valueToProcess = $('#savePointsTable').val() + ',' + $('#selectgraphictype').val();
 		break;
-	case "POPULATE_GRAPHICS_MOSTRUNS":
-		valueToProcess = $('#savePointsTable').val() + ',' + $('#selectgraphictype').val();
+	case "POPULATE_GRAPHICS_MOSTRUNS": case "POPULATE_GRAPHICS_MOSTWKTS": case "POPULATE_GRAPHICS_MOSTSIXES": case "POPULATE_GRAPHICS_MOSTFOURS":
+	 case "POPULATE_GRAPHICS_MOSTNINE": case "POPULATE_GRAPHICS_TAPEBALL":
+		valueToProcess = $('#savePointsTable').val() + ',' + $('#selectGraphictype').val()+ ',' + $('#selectPlayerName').val();
 		 break;	
+	case 'POPULATE-LASTXBALLS_VR': 
+		valueToProcess = $('#selectLastxBalls').val() + ',' + $('#selectGraphictype').val()+ ',' + $('#savePointsTable').val();
+		 break;
 	case "POPULATE_GRAPHICS_BOUNDARIES":
 			valueToProcess = $('#savePointsTable').val() + ',' + document.getElementById('which_keypress').value;
 		break;	
-	case "POPULATE_GRAPHICS_LINEUP":
-		valueToProcess = $('#whichScene').val() + ',' +$('#savePointsTable').val();
-		break;
 	case 'POPULATE_GRAPHICS_FIXTURE':
 		valueToProcess = $('#selectTeam').val() + ',' +$('#savePointsTable').val();
 		break;
@@ -615,6 +650,21 @@ function processCricketProcedures(whatToProcess)
 				break;
 			case 'POPULATE_MOSTRUNS':
 				addItemsToList('MOST_RUNS_GRAPHIC_OPTION',data);
+				break;
+			case 'ISPL_TAPEBALL_GRAPHIC_OPTIONS':
+				addItemsToList('ISPLTAPEBALLOVER_GRAPHIC_OPTION',data);
+				break;		
+			case 'POPULATE_MOSTWKTS':
+				addItemsToList('MOST_WKTS_GRAPHIC_OPTION',data);
+				break;
+			case 'POPULATE_MOSTNINE':
+				addItemsToList('MOST_NINE_GRAPHIC_OPTION',data);
+				break;	
+			case 'POPULATE_MOSTFOURS':
+				addItemsToList('MOST__GRAFOURS_PHIC_OPTION',data);
+				break;
+			case 'POPULATE_MOSTSIXES':
+				addItemsToList('MOST_SIX_GRAPHIC_OPTION',data);
 				break;	
         	}
 			processWaitingButtonSpinner('END_WAIT_TIMER');
@@ -628,7 +678,6 @@ function addItemsToList(whatToProcess, dataToProcess)
 {
 	var select,option,header_text,div,table,tbody,row;
 	switch(whatToProcess){
-		
 		case 'DISPLAYBATPREVIEW':
 			displayStats(dataToProcess);
 		 	break;
@@ -1708,8 +1757,9 @@ function addItemsToList(whatToProcess, dataToProcess)
 		case 'LOAD_GRAPHICS-OPTION':case 'GRAPHICS': case 'ISPL_50_50_OPTIONS': case 'ISPL_BALL_OPTIONS':case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':
 		case "ISPL_LINEUP_OPTIONS":case "ISPL_PREVIOUS_MATCH_SUMMARY_OPTIONS":case 'POPULATE_FF_CURRENT_MATCH_SUMMARY': case 'FIXTURE_OPTIONS': 
 		case "ISPL_TARGET_OPTIONS": case "ISPL_POJECTED_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS": case "MATCHID_OPTIONS":
-		 case "MOST_RUNS_GRAPHIC_OPTION": case "POPULATE_MOSTWKTS":
-		case "ISPL_BOUNDARIES_OPTIONS": case "ISPL_MVP_OPTIONS_LEADERBOARD": case "POPULATE_MOSTNINE": case "POPULATE_MOSTFOURS": case "POPULATE_MOSTSIXES":
+		 case "MOST_RUNS_GRAPHIC_OPTION": case "ISPLTAPEBALLOVER_GRAPHIC_OPTION": case "MOST_WKTS_GRAPHIC_OPTION": case "MOST__GRAFOURS_PHIC_OPTION": case 'MOST_SIX_GRAPHIC_OPTION':
+		case "ISPL_BOUNDARIES_OPTIONS": case "ISPL_MVP_OPTIONS_LEADERBOARD": case "MOST_NINE_GRAPHIC_OPTION":  case "POPULATE_LASTXBALLS": case "POPULATE_PARTNERSHIP":
+		case "LINEUP_GRAPHIC_OPTIONS": case "RUN_RATE-OPTION":
 			switch ($('#select_broadcaster').val().toUpperCase()){
 				case 'DOAD_TRIO':
 					$('#select_graphic_options_div').empty();
@@ -1978,10 +2028,424 @@ function addItemsToList(whatToProcess, dataToProcess)
 						    row.insertCell(3).appendChild(div);
 						    document.getElementById('select_graphic_options_div').style.display = '';
 							break;	
+						
+						case 'ISPLTAPEBALLOVER_GRAPHIC_OPTION':
+							select = document.createElement('select');
+							select.id = 'selectPlayerName';
+							select.name = select.id;
+							num = 0;
+							for(i=0;i<dataToProcess.length;i++){
+								if(num<5){
+									option = document.createElement('option');
+						            option.value = (num+1)+ "_" + dataToProcess[i].playerId;
+						            option.text = dataToProcess[i].player.full_name;
+						            select.appendChild(option);
+						            num++;
+								}
+							}
+							row.insertCell(0).appendChild(select);
+							
+							select = document.createElement('select');
+						   select.id = 'selectGraphictype';
+						   select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(2).appendChild(select);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics_tapeballover';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+							break;	
+						case 'MOST_WKTS_GRAPHIC_OPTION':
+							select = document.createElement('select');
+							select.id = 'selectPlayerName';
+							select.name = select.id;
+							num = 0;
+							for(i=0;i<dataToProcess.length;i++){
+								if(num<5){
+									option = document.createElement('option');
+						            option.value = (num+1)+ "_" + dataToProcess[i].playerId;
+						            option.text = dataToProcess[i].player.full_name;
+						            select.appendChild(option);
+						            num++;
+								}
+							}
+							row.insertCell(0).appendChild(select);
+							
+							select = document.createElement('select');
+						   select.id = 'selectGraphictype';
+						   select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(2).appendChild(select);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics_mostwkt';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+						    break;
+						    	
+						   case 'MOST__GRAFOURS_PHIC_OPTION':
+							select = document.createElement('select');
+							select.id = 'selectPlayerName';
+							select.name = select.id;
+							num = 0;
+							for(i=0;i<dataToProcess.length;i++){
+								if(num<5){
+									option = document.createElement('option');
+						            option.value = (num+1)+ "_" + dataToProcess[i].playerId;
+						            option.text = dataToProcess[i].player.full_name;
+						            select.appendChild(option);
+						            num++;
+								}
+							}
+							row.insertCell(0).appendChild(select);
+							
+							select = document.createElement('select');
+						   select.id = 'selectGraphictype';
+						   select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(2).appendChild(select);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics_mostfour';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+						    break; 
+						 case 'MOST_SIX_GRAPHIC_OPTION':
+							select = document.createElement('select');
+							select.id = 'selectPlayerName';
+							select.name = select.id;
+							num = 0;
+							for(i=0;i<dataToProcess.length;i++){
+								if(num<5){
+									option = document.createElement('option');
+						            option.value = (num+1)+ "_" + dataToProcess[i].playerId;
+						            option.text = dataToProcess[i].player.full_name;
+						            select.appendChild(option);
+						            num++;
+								}
+							}
+							row.insertCell(0).appendChild(select);
+							
+							select = document.createElement('select');
+						   select.id = 'selectGraphictype';
+						   select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(2).appendChild(select);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics_mostsix';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+						    break; 
+						   
+						  case 'MOST_NINE_GRAPHIC_OPTION':
+							select = document.createElement('select');
+							select.id = 'selectPlayerName';
+							select.name = select.id;
+							num = 0;
+							for(i=0;i<dataToProcess.length;i++){
+								if(num<5){
+									option = document.createElement('option');
+						            option.value = (num+1)+ "_" + dataToProcess[i].playerId;
+						            option.text = dataToProcess[i].player.full_name;
+						            select.appendChild(option);
+						            num++;
+								}
+							}
+							row.insertCell(0).appendChild(select);
+							
+							select = document.createElement('select');
+						   select.id = 'selectGraphictype';
+						   select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							header_text = document.createElement('label');
+							header_text.innerHTML = 'Page No.';
+							header_text.htmlFor = select.id;
+							
+							row.insertCell(2).appendChild(select);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_graphics_mostnine';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+						    break; 
+						  case 'POPULATE_LASTXBALLS':
+						   header_text = document.createElement('label');
+ 						   header_text.innerHTML = 'Number of Balls';
+    
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'selectLastxBalls';
+							select.value = '';
+							
+							div = document.createElement('div');
+						    div.appendChild(header_text);
+						    div.appendChild(document.createElement('br'));
+						    div.appendChild(select);
+							
+							row.insertCell(0).appendChild(div);
+							
+							select = document.createElement('select');
+						    select.id = 'selectGraphictype';
+						    select.name = select.id;
+						
+							option = document.createElement('option');
+							option.value = 'AR';
+							option.text = 'AR';
+							select.appendChild(option);
+							
+							option = document.createElement('option');
+							option.value = 'Drone';
+							option.text = 'Drone';
+							select.appendChild(option);
+							
+							row.insertCell(1).appendChild(select); 
+							
+							header_text = document.createElement('label');
+   						    header_text.innerHTML = 'Page No.';
+    
+							select = document.createElement('input');
+							select.type = "text";
+							select.id = 'savePointsTable';
+							select.value = '';
+							
+							div = document.createElement('div');
+						    div.appendChild(header_text);
+						    div.appendChild(document.createElement('br'));
+						    div.appendChild(select);
+							
+							 row.insertCell(2).appendChild(div);
+			
+					    	option = document.createElement('input');
+						    option.type = 'button';
+							
+							option = document.createElement('input');
+						    option.type = 'button';
+							option.name = 'populate_LastXBalls_VR_btn';
+							option.value = 'populate';
+						    option.id = option.name;
+						    option.setAttribute('onclick',"processUserSelection(this)");
+						    
+						    div = document.createElement('div');
+						    div.append(option);
+						
+							option = document.createElement('input');
+							option.type = 'button';
+							option.name = 'cancel_graphics_btn';
+							option.id = option.name;
+							option.value = 'Cancel';
+							option.setAttribute('onclick','processUserSelection(this)');
+						
+						    div.append(option);
+						    
+						    row.insertCell(3).appendChild(div);
+						    document.getElementById('select_graphic_options_div').style.display = '';
+						    break; 
 					case 'ISPL_NEXT_BAT_OPTIONS':case'ISPL_COMPARISION_OPTIONS':case 'POPULATE_FF_CURRENT_MATCH_SUMMARY': 
-					case "ISPL_TARGET_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS": case "ISPL_MVP_OPTIONS_LEADERBOARD":
-					 case "MATCHID_OPTIONS":  case "ISPL_BOUNDARIES_OPTIONS": case "ISPL_POJECTED_OPTIONS": case "POPULATE_MOSTWKTS": 
-					 case "POPULATE_MOSTNINE": case "POPULATE_MOSTFOURS": case "POPULATE_MOSTSIXES":
+					case "ISPL_TARGET_OPTIONS": case "ISPL_TOSS_OPTIONS": case "ISPL_EQUATION_OPTIONS": case "ISPL_MVP_OPTIONS": case "ISPL_MVP_OPTIONS_LEADERBOARD": case "RUN_RATE-OPTION":
+					 case "MATCHID_OPTIONS":  case "ISPL_BOUNDARIES_OPTIONS": case "ISPL_POJECTED_OPTIONS":  case "POPULATE_PARTNERSHIP": case "LINEUP_GRAPHIC_OPTIONS":
 					 	select = document.createElement('input');
 						select.type = "text";
 						select.id = 'savePointsTable';
@@ -2020,33 +2484,25 @@ function addItemsToList(whatToProcess, dataToProcess)
 						case "MATCHID_OPTIONS":	
 							option.name = 'populate_graphics_matchid';
 							option.value = 'populate';
-							break;
-						/*case "POPULATE_MOSTRUNS":
-							option.name = 'populate_graphics_mostruns';
-							option.value = 'populate';
-							break;	*/
-						case "POPULATE_MOSTWKTS":
-							option.name = 'populate_graphics_mostwkt';
+							break;	
+						case "POPULATE_PARTNERSHIP":
+							option.name = 'populate_graphics_partnership';
 							option.value = 'populate';
 							break;	
-						case "POPULATE_MOSTNINE":	
-							option.name = 'populate_graphics_mostnine';
+						case "LINEUP_GRAPHIC_OPTIONS":
+							option.name = 'populate_graphics_lineup';
 							option.value = 'populate';
 							break;
-						case "POPULATE_MOSTFOURS":
-							option.name = 'populate_graphics_mostfour';
-							option.value = 'populate';
-							break;
-						case "POPULATE_MOSTSIXES":
-							option.name = 'populate_graphics_mostsix';
-							option.value = 'populate';
-							break;	
 						case "ISPL_MVP_OPTIONS":
 						    option.name = 'populate_mvp';
 							option.value = 'populate';
 							break;
 						case "ISPL_MVP_OPTIONS_LEADERBOARD":	
 							option.name = 'populate_mvp_leaderboard';
+							option.value = 'populate';
+							break;	
+						case "RUN_RATE-OPTION":	
+							option.name = 'populate_requiredrunrate';
 							option.value = 'populate';
 							break;	
 						case "ISPL_BOUNDARIES_OPTIONS":

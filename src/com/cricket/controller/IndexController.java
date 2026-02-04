@@ -69,6 +69,7 @@ public class IndexController
 	public List<Statistics> allStatistics = new ArrayList<Statistics>();
 	public static PrintWriter print_writer;
 	public static List<Tournament> pastTournament = new ArrayList<Tournament>();
+	public static List<BestStats> past_tape = new ArrayList<BestStats>();
 	
 	
 	private static final Map<String, Comparator<Tournament>> SORT_MAP;
@@ -84,30 +85,21 @@ public class IndexController
 	            new CricketFunctions.BatsmanFoursComparator();
 	    Comparator<Tournament> sixes =
 	            new CricketFunctions.BatsmanSixesComparator();
-	    Comparator<Tournament> strikeRate =
-	            new CricketFunctions.BestBatsmanStrikeRateComparator();
+	    Comparator<Tournament> nines =
+	            new CricketFunctions.BatsmanNinesComparator();
 	    Comparator<Tournament> economy =
 	            new CricketFunctions.BestBowlerEconomyComparator();
 
 	    map.put("POPULATE_MOSTRUNS", mostRuns);
 
-	    map.put("x", mostWickets);
-	    map.put("Shift_$", mostWickets);
-	    map.put("Alt_Shift_X", mostWickets);
+	    map.put("POPULATE_MOSTWKTS", mostWickets);
 
-	    map.put("c", fours);
-	    map.put("Control_Shift_@", fours);
-	    map.put("Alt_Shift_T", fours);
+	    map.put("POPULATE_MOSTFOURS", fours);
 
-	    map.put("v", sixes);
-	    map.put("Control_Alt_5", sixes);
-	    map.put("Alt_Shift_V", sixes);
+	    map.put("POPULATE_MOSTSIXES", sixes);
+	    
+	    map.put("POPULATE_MOSTNINE", nines);
 
-	    map.put("Control_Shift_Z", strikeRate);
-	    map.put("Control_Alt_9", strikeRate);
-
-	    map.put("Control_Shift_Y", economy);
-	    map.put("Control_Alt_0", economy);
 
 	    SORT_MAP = Collections.unmodifiableMap(map);
 	}
@@ -233,7 +225,7 @@ public class IndexController
 			allStatsType = cricketService.getAllStatsType();
 			allStatistics = cricketService.getAllStats();
 			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
-			
+			past_tape = CricketFunctions.extractTapeData("PAST_MATCHES_DATA", cricketService, session_match, null, headToHead.getH2hPlayer());
 			pastTournament = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false,headToHead.getH2hPlayer(), 
 					cricketService, session_match, null);
 		//	past_tournament_stats = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
@@ -258,7 +250,7 @@ public class IndexController
 		case "GRAPHIC_OPTIONS":
 			Map<String,String> map = getDataFromExcelFile(mainCricketDir);
 			return JSONArray.fromObject(map.keySet()).toString();
-		case "POPULATE_MOSTRUNS":
+		case "POPULATE_MOSTRUNS": case "POPULATE_MOSTWKTS": case "POPULATE_MOSTFOURS": case "POPULATE_MOSTSIXES": case "POPULATE_MOSTNINE":
 			List<Tournament> tournamentStats = CricketFunctions.extractTournamentData("CURRENT_MATCH_DATA", false, 
 					headToHead.getH2hPlayer(), cricketService, session_match, pastTournament);
 			
@@ -268,12 +260,18 @@ public class IndexController
 			    }
 			    
 			return JSONArray.fromObject(tournamentStats).toString();
+		case "ISPL_TAPEBALL_GRAPHIC_OPTIONS":
+			List<BestStats> tapeball = new ArrayList<BestStats>();
+			tapeball = CricketFunctions.extractTapeData("CURRENT_MATCH_DATA", cricketService, session_match, past_tape, headToHead.getH2hPlayer());
+			Collections.sort(tapeball,new CricketFunctions.TapeBowlerWicketsComparator());
+			return JSONArray.fromObject(tapeball).toString();
 		case "RE_READ_DATA":
 			session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
 				CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
 			headToHead = CricketFunctions.extractHeadToHead(session_match, cricketService);
 			pastTournament = CricketFunctions.extractTournamentData("PAST_MATCHES_DATA", false, headToHead.getH2hPlayer(), cricketService, session_match, null);
 			//matchstats = CricketFunctions.getAllEvents(session_match ,session_selected_broadcaster, session_match.getEventFile().getEvents());
+			past_tape = CricketFunctions.extractTapeData("PAST_MATCHES_DATA", cricketService, session_match, null, headToHead.getH2hPlayer());
 			allStatsType = cricketService.getAllStatsType();
 			allStatistics = cricketService.getAllStats();
 			return JSONObject.fromObject(session_match).toString();
@@ -296,7 +294,8 @@ public class IndexController
 			case CricketUtil.DOAD_TRIO:
 //				session_match = CricketFunctions.populateMatchVariables(cricketService, CricketFunctions.readOrSaveMatchFile(CricketUtil.READ,
 //						CricketUtil.SETUP + "," + CricketUtil.MATCH + "," + CricketUtil.EVENT, session_match,session_Configurations));
-				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, headToHead, pastTournament, valueToProcess);
+				this_DOAD_TRIO.ProcessGraphicOption(whatToProcess, cricketService, session_match, print_writer, headToHead, pastTournament,
+						past_tape, valueToProcess);
 			}
 			return JSONObject.fromObject(session_match).toString();
 		}
